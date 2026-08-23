@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EcoTrack Pro - Carbon Footprint Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root { 
+            --bg: #f8fafc; 
+            --surface: #ffffff; 
+            --surface-hover: #f1f5f9; 
+            --text: #0f172a; 
+            --text-muted: #64748b; 
+            --primary: #059669; 
+            --primary-light: #d1fae5; 
+            --primary-hover: #047857; 
+            --border: #e2e8f0; 
+            --danger: #ef4444; 
+            --warning: #f59e0b; 
+            --info: #3b82f6; 
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02); 
+            --radius: 16px; 
+        }
+        [data-theme="dark"] { 
+            --bg: #090d16; 
+            --surface: #131c31; 
+            --surface-hover: #1e293b; 
+            --text: #f8fafc; 
+            --text-muted: #94a3b8; 
+            --primary: #10b981; 
+            --primary-light: rgba(16, 185, 129, 0.15); 
+            --primary-hover: #34d399; 
+            --border: #1e293b; 
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4); 
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+        body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; display: flex; justify-content: center; overflow-x: hidden; }
+        
+        .container { width: 100%; max-width: 1280px; margin: 0 auto; }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 var(--primary-light); }
+            70% { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        @keyframes floatEffect {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.92); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; background: var(--surface); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); gap: 16px; animation: slideUp 0.5s ease-out; }
+        .brand { display: flex; align-items: flex-start; gap: 14px; flex-grow: 1; }
+        .brand-icon { width: 48px; height: 48px; background: var(--primary-light); color: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; animation: floatEffect 3s infinite ease-in-out; }
+        .brand-text { display: flex; flex-direction: column; }
+        header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .version-badge { font-size: 0.7rem; font-weight: 700; background: var(--primary-light); color: var(--primary); padding: 3px 8px; border-radius: 20px; }
+        .slogan { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; margin-top: 4px; line-height: 1.4; }
+        
+        .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        .btn-theme, .btn-knowledge, .btn-sound { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text); padding: 10px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 600; flex-shrink: 0; white-space: nowrap; transition: all 0.25s ease; }
+        .btn-knowledge { background: var(--primary-light); color: var(--primary-hover); border-color: var(--primary); }
+        .btn-theme:hover, .btn-knowledge:hover, .btn-sound:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--primary-light); }
+
+        @media (max-width: 600px) {
+            header { flex-direction: column; align-items: stretch; }
+            .header-actions { margin-top: 8px; }
+        }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
+        @media(max-width: 1024px) { .dashboard-grid { grid-template-columns: 1fr; gap: 16px; } }
+        
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); display: flex; flex-direction: column; justify-content: space-between; animation: slideUp 0.5s ease-out backwards; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08); }
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        @media(max-width: 600px) { .card { padding: 16px; } }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .card-title { font-size: 1.05rem; font-weight: 700; }
+        
+        .gamification-bar { display: flex; gap: 12px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px; }
+        .streak-card { background: var(--surface); border: 1px solid var(--border); padding: 12px 18px; border-radius: var(--radius); display: flex; align-items: center; gap: 12px; flex-shrink: 0; box-shadow: var(--shadow); transition: transform 0.2s; }
+        .streak-card:hover { transform: scale(1.02); }
+        .streak-icon { font-size: 1.5rem; animation: floatEffect 2.5s infinite ease-in-out; }
+        .streak-val { font-size: 1.1rem; font-weight: 800; color: var(--text); }
+        .streak-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+        
+        .badge-list { display: flex; gap: 8px; flex-wrap: nowrap; overflow-x: auto; width: 100%; }
+        .achievement-badge { background: var(--surface); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 6px; white-space: nowrap; opacity: 0.4; filter: grayscale(1); transition: all 0.3s ease; }
+        .achievement-badge.unlocked { opacity: 1; filter: grayscale(0); border-color: var(--primary); background: var(--primary-light); color: var(--primary); animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        .tree-avatar-box { display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--surface-hover); border-radius: 12px; padding: 12px; margin-bottom: 16px; border: 1px solid var(--border); position: relative; }
+        #treeCanvas { background: transparent; width: 100%; max-width: 220px; height: 160px; }
+        .tree-status-text { font-size: 0.8rem; font-weight: 700; color: var(--primary); margin-top: 4px; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+        input[type="number"], input[type="date"], input[type="text"], select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-size: 0.95rem; outline: none; transition: all 0.2s; }
+        input[type="number"]:focus, input[type="date"]:focus, input[type="text"]:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); transform: translateY(-1px); }
+        
+        .quick-presets { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+        .chip { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .chip:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+        
+        .action-row { display: flex; gap: 12px; margin-top: 24px; }
+        .btn-primary { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; width: 100%; box-shadow: 0 4px 12px var(--primary-light); transition: all 0.3s; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 16px var(--primary-light); }
+        .btn-primary:not(:disabled) { animation: pulseGlow 2s infinite; }
+        .btn-primary:disabled { background: var(--text-muted); cursor: not-allowed; opacity: 0.4; box-shadow: none; transform: none; animation: none; }
+        
+        .btn-secondary { background: transparent; color: var(--text); border: 2px solid var(--border); padding: 14px; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; width: 100%; transition: all 0.2s; }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+        
+        .score-container { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 10px 0; }
+        .radial-gauge { position: relative; width: 150px; height: 150px; }
+        .radial-gauge svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .radial-gauge circle { fill: none; stroke-width: 10; stroke-linecap: round; }
+        .gauge-bg { stroke: var(--border); }
+        .gauge-fill { stroke: var(--primary); stroke-dasharray: 440; stroke-dashoffset: 440; transition: stroke-dashoffset 1s ease-out, stroke 0.3s ease; }
+        .gauge-center { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        .score-number { font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; transition: color 0.3s ease; }
+        .score-unit { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-bottom: 8px; transition: all 0.3s ease; }
+        .goal-tracker { margin-top: 6px; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-align: center; }
+        
+        .metric-group { margin-top: 14px; }
+        .metric-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; }
+        .progress-track { background: var(--border); height: 8px; border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
+        .progress-fill { height: 100%; width: 0%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        .tip-box { background: var(--surface-hover); border-left: 4px solid var(--primary); padding: 14px 16px; border-radius: 0 10px 10px 0; font-size: 0.85rem; margin-top: 16px; color: var(--text-muted); line-height: 1.5; animation: slideUp 0.5s ease-out; }
+        .tip-box strong { color: var(--text); display: block; margin-bottom: 4px; }
+
+        .chart-container { position: relative; height: 230px; width: 100%; }
+        
+        .history-card { margin-top: 24px; animation: slideUp 0.5s ease-out backwards; animation-delay: 0.3s; }
+        .table-responsive { overflow-x: auto; width: 100%; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; min-width: 650px; }
+        th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        th { color: var(--text-muted); font-weight: 600; }
+        tr { transition: background-color 0.2s ease; }
+        tr:hover td { background-color: var(--surface-hover); }
+        
+        .btn-delete { background: rgba(239, 68, 68, 0.1); border: none; color: var(--danger); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: all 0.2s; }
+        .btn-delete:hover { background: var(--danger); color: white; transform: scale(1.05); }
+        
+        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 12px 20px; border-radius: 10px; box-shadow: var(--shadow); font-size: 0.85rem; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 1000; border-left: 4px solid var(--primary); }
+        .toast.show { transform: translateY(0); opacity: 1; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 2000; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        
+        .modal-card { background: var(--surface); padding: 24px; border-radius: var(--radius); width: 90%; max-width: 400px; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border: 1px solid var(--border); }
+        .modal-overlay.active .modal-card { transform: scale(1); }
+        .modal-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+        .modal-text { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+        .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
+        .btn-modal-cancel { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text); padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-modal-confirm { background: var(--danger); color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+        .knowledge-modal { max-width: 720px; width: 92%; max-height: 85vh; overflow-y: auto; }
+        .knowledge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+        .knowledge-card { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; transition: all 0.25s ease; }
+        .knowledge-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .knowledge-card h4 { font-size: 0.95rem; color: var(--text); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .knowledge-card p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+
+        /* Floating AI Chatbot Widget Styles */
+        .chat-toggle-btn { position: fixed; bottom: 24px; left: 24px; width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; z-index: 2900; transition: transform 0.25s ease, background-color 0.25s ease; }
+        .chat-toggle-btn:hover { transform: scale(1.08); background: var(--primary-hover); }
+        .chat-widget { position: fixed; bottom: 90px; left: 24px; width: 340px; height: 460px; max-width: calc(100vw - 48px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; z-index: 2900; opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.95); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .chat-widget.active { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
+        .chat-header { background: var(--surface-hover); padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.9rem; }
+        .chat-messages { flex-grow: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 0.82rem; }
+        .chat-msg { max-width: 85%; padding: 8px 12px; border-radius: 12px; line-height: 1.4; word-wrap: break-word; }
+        .chat-msg.bot { background: var(--surface-hover); color: var(--text); border-bottom-left-radius: 2px; align-self: flex-start; border: 1px solid var(--border); }
+        .chat-msg.user { background: var(--primary); color: white; border-bottom-right-radius: 2px; align-self: flex-end; }
+        .chat-input-area { display: flex; padding: 10px; border-top: 1px solid var(--border); gap: 6px; background: var(--surface); }
+        .chat-input-area input { flex-grow: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 0.82rem; outline: none; }
+        .chat-input-area button { background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.82rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="brand">
+            <div class="brand-icon">🌱</div>
+            <div class="brand-text">
+                <h1>EcoTrack Pro <span class="version-badge">v7.0</span></h1>
+                <p class="slogan">Track, reduce, and offset your daily carbon footprint.</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-sound" id="soundToggleBtn" onclick="toggleSound()">🔊 Sound: ON</button>
+            <button class="btn-knowledge" onclick="openKnowledgeModal()">📚 Eco Knowledge Hub</button>
+            <button class="btn-theme" id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
+        </div>
+    </header>
+
+    <div class="gamification-bar">
+        <div class="streak-card">
+            <span class="streak-icon">🔥</span>
+            <div>
+                <div class="streak-val" id="streakCount">0 Days</div>
+                <div class="streak-label">Logging Streak</div>
+            </div>
+        </div>
+        <div class="badge-list">
+            <div class="achievement-badge" id="badgeRookie">🌱 Eco Rookie</div>
+            <div class="achievement-badge" id="badgeNeutral">🏆 Neutral Hero</div>
+            <div class="achievement-badge" id="badgeOffset">🌳 Offset Master</div>
+            <div class="achievement-badge" id="badgeStreak">⚡ 5-Day Streak</div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="card">
+            <div>
+                <div class="card-header"><span class="card-title">Log Daily Metrics</span></div>
+                
+                <div class="form-group">
+                    <div class="form-label">📅 Entry Date</div>
+                    <input type="date" id="entryDate" onchange="playUIFeedback('click')">
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label"><span>🚗 Travel Distance</span><span id="distLabel">0 km</span></div>
+                    <input type="number" id="dist" min="0" value="0" oninput="document.getElementById('distLabel').innerText = this.value + ' km'; playUIFeedback('click');">
+                    <div class="quick-presets">
+                        <button class="chip" onclick="setDist(0)">WFH (0km)</button>
+                        <button class="chip" onclick="setDist(10)">+10 km</button>
+                        <button class="chip" onclick="setDist(25)">+25 km</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">Mode of Transport</div>
+                    <select id="transportMode" onchange="playUIFeedback('click')">
+                        <option value="0.21">Petrol Car (~0.21 kg/km)</option>
+                        <option value="0.05">Electric Vehicle (~0.05 kg/km)</option>
+                        <option value="0.08">Public Bus / Metro (~0.08 kg/km)</option>
+                        <option value="0">Walk / Bicycle (0.00 kg/km)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label"><span>⚡ Energy Consumption</span><span id="powerLabel">0 kWh</span></div>
+                    <input type="number" id="power" min="0" value="0" oninput="document.getElementById('powerLabel').innerText = this.value + ' kWh'; playUIFeedback('click');">
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label">Energy Source</div>
+                    <select id="energySource" onchange="playUIFeedback('click')">
+                        <option value="0.85">Grid Electricity (~0.85 kg/kWh)</option>
+                        <option value="0.04">Solar / Renewable (~0.04 kg/kWh lifecycle)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <div class="form-label">🍔 Diet Choice</div>
+                    <select id="dietType" onchange="playUIFeedback('click')">
+                        <option value="7.20">Meat Heavy (~7.2 kg/day)</option>
+                        <option value="4.50" selected>Balanced Mixed (~4.5 kg/day)</option>
+                        <option value="2.90">Vegan (~2.9 kg/day)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label">♻️ Waste Management Practice</div>
+                    <select id="wasteType" onchange="playUIFeedback('click')">
+                        <option value="0.05">🌱 Composted Organics & Fully Recycled (~0.05 kg/day)</option>
+                        <option value="0.25">♻️ Separated Recyclables Only (~0.25 kg/day)</option>
+                        <option value="0.80" selected>🗑️ All Mixed into Landfill / Regular Trash (~0.80 kg/day)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="background: var(--primary-light); padding: 14px; border-radius: 10px; border: 1px dashed var(--primary); margin-top: 20px;">
+                    <div class="form-label" style="color: var(--primary-hover);">
+                        <span>🌳 Trees Planted (Offsets)</span>
+                        <span id="treeLabel">0 trees</span>
+                    </div>
+                    <input type="number" id="trees" min="0" value="0" style="border-color: var(--primary);" oninput="document.getElementById('treeLabel').innerText = this.value + ' trees'; playUIFeedback('treeAdd');">
+                    <div style="font-size: 0.73rem; margin-top: 6px; color: var(--primary-hover); font-weight: 600;">*Calculates standard daily absorption (~0.06 kg/day)</div>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <button class="btn-secondary" onclick="calculatePreview()">🧮 Calculate</button>
+                <button class="btn-primary" id="saveBtn" onclick="saveCalculatedEntry()" disabled>💾 Save Entry</button>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 24px;">
+            <!-- Tree Animation Container -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Eco Companion Tree</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Live Tree Status</span>
+                </div>
+                <div class="tree-avatar-box">
+                    <canvas id="treeCanvas" width="220" height="160"></canvas>
+                    <div class="tree-status-text" id="treeStatusText">Sprouting Healthy...</div>
+                </div>
+
+                <div>
+                    <div class="card-header" style="margin-bottom: 12px; padding-bottom: 8px;">
+                        <span class="card-title">Daily Analytics</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-size: 0.8rem; font-weight: 600;">🎯 Goal:</span>
+                            <input type="number" id="dailyGoal" value="12" style="width: 60px; padding: 6px; font-size: 0.85rem; text-align: center; border-radius: 6px;" onchange="calculatePreview()">
+                        </div>
+                    </div>
+
+                    <div class="score-container">
+                        <span class="badge" id="statusBadge" style="background: var(--surface-hover); color: var(--text-muted);">Awaiting Log</span>
+                        
+                        <div class="radial-gauge">
+                            <svg viewBox="0 0 160 160">
+                                <circle class="gauge-bg" cx="80" cy="80" r="70"></circle>
+                                <circle class="gauge-fill" id="gaugeCircle" cx="80" cy="80" r="70"></circle>
+                            </svg>
+                            <div class="gauge-center">
+                                <div class="score-number" id="netScore">0.00</div>
+                                <div class="score-unit">kg CO₂e Net</div>
+                            </div>
+                        </div>
+                        <div class="goal-tracker" id="goalTracker">0% of daily limit</div>
+                    </div>
+                    
+                    <div class="metric-group">
+                        <div class="metric-header"><span>🚗 Transport Emissions</span><span id="tVal">0.00 kg</span></div>
+                        <div class="progress-track"><div class="progress-fill" id="tBar" style="background: #3b82f6;"></div></div>
+                        
+                        <div class="metric-header"><span>⚡ Energy Emissions</span><span id="pVal">0.00 kg</span></div>
+                        <div class="progress-track"><div class="progress-fill" id="pBar" style="background: #f59e0b;"></div></div>
+
+                        <div class="metric-header"><span>🗑️ Waste & Diet</span><span id="wdVal">0.00 kg</span></div>
+                        <div class="progress-track"><div class="progress-fill" id="wdBar" style="background: #8b5cf6;"></div></div>
+
+                        <div class="metric-header"><span style="color: var(--primary);">🌳 Tree Offsets Applied</span><span id="offsetVal" style="color: var(--primary);">0.00 kg</span></div>
+                        <div class="progress-track"><div class="progress-fill" id="offsetBar" style="background: var(--primary);"></div></div>
+                    </div>
+                </div>
+
+                <div class="tip-box" id="ecoTip">
+                    <strong>💡 Eco Tip:</strong>
+                    Enter your day's consumption metrics and click 'Calculate' to see tailored green tips!
+                </div>
+            </div>
+
+            <div class="card" style="flex-grow: 1;">
+                <div class="card-header"><span class="card-title">7-Day Carbon Trend</span></div>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card history-card">
+        <div class="card-header">
+            <span class="card-title">Activity Log</span>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <input type="text" id="searchInput" placeholder="🔍 Search Date..." onkeyup="renderHistory()" style="padding: 6px 12px; font-size: 0.8rem; width: 140px;">
+                <button class="chip" onclick="exportCSV()" style="color: var(--info);">📊 Export CSV</button>
+                <button class="chip" onclick="exportData()" style="color: var(--info);">📥 Export JSON</button>
+                <button class="chip" onclick="document.getElementById('importFile').click()" style="color: var(--primary);">📤 Import</button>
+                <input type="file" id="importFile" style="display: none;" accept=".json" onchange="importData(event)">
+                <button class="chip" onclick="confirmClearHistory()" style="color: var(--danger);">Clear All Data</button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Transport</th>
+                        <th>Energy</th>
+                        <th>Diet & Waste</th>
+                        <th style="color: var(--primary);">Offsets</th>
+                        <th>Net Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toastBox">Log saved successfully!</div>
+
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-card">
+        <div class="modal-title">Clear All History?</div>
+        <div class="modal-text">Are you sure you want to permanently delete all your logged carbon data? This action cannot be undone.</div>
+        <div class="modal-buttons">
+            <button class="btn-modal-cancel" onclick="closeModal('confirmModal')">Cancel</button>
+            <button class="btn-modal-confirm" onclick="executeClearHistory()">Yes, Delete All</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="knowledgeModal">
+    <div class="modal-card knowledge-modal">
+        <div class="card-header" style="margin-bottom: 10px;">
+            <span class="card-title" style="font-size: 1.2rem;">📚 Eco Knowledge Hub</span>
+            <button class="btn-modal-cancel" onclick="closeModal('knowledgeModal')" style="padding: 6px 12px; font-size: 0.8rem;">✕ Close</button>
+        </div>
+        <p class="slogan" style="margin-bottom: 16px;">Core benchmarks, carbon emission metrics, and daily actionable reduction knowledge.</p>
+        
+        <div class="knowledge-grid">
+            <div class="knowledge-card">
+                <h4>🌎 Daily Carbon Targets</h4>
+                <p>The global average footprint is ~12 kg CO₂e/day. To limit global warming under climate targets, individual daily limits must drop below <strong>5.5 kg CO₂e/day</strong>.</p>
+            </div>
+            <div class="knowledge-card">
+                <h4>🚗 Transport Impact</h4>
+                <p>Petrol vehicles produce around <strong>0.21 kg CO₂e per km</strong>. Swapping 10 km of car commuting for public transit saves roughly 1.3 kg of CO₂ every single day.</p>
+            </div>
+            <div class="knowledge-card">
+                <h4>⚡ Energy & Grid Intensity</h4>
+                <p>Standard coal-heavy electricity grids emit ~0.85 kg CO₂e per kWh. Solar and wind energy lower lifecycle emissions down to ~0.04 kg CO₂e per kWh.</p>
+            </div>
+            <div class="knowledge-card">
+                <h4>🍔 Plant-Based Transition</h4>
+                <p>Diet choices carry a significant carbon footprint. Moving from a heavy meat diet (7.2 kg/day) to a vegan diet (2.9 kg/day) saves over <strong>1.5 metric tons</strong> of CO₂ annually.</p>
+            </div>
+            <div class="knowledge-card">
+                <h4>🌳 Tree Offset Mechanics</h4>
+                <p>A mature tree absorbs roughly <strong>21.77 kg CO₂ per year</strong> (~0.06 kg/day). Planting trees directly compensates long-term residual carbon footprints.</p>
+            </div>
+            <div class="knowledge-card">
+                <h4>🗑️ Waste Management</h4>
+                <p>Sending organic waste to landfills releases methane gas (~0.80 kg CO₂e/day). Composting food waste cuts landfill methane emissions down to near zero (~0.05 kg CO₂e/day).</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating AI Chatbot Interface -->
+<button class="chat-toggle-btn" onclick="toggleChatWidget()" title="Eco AI Assistant">🤖</button>
+<div class="chat-widget" id="chatWidget">
+    <div class="chat-header">
+        <span>🤖 Eco AI Assistant</span>
+        <button onclick="toggleChatWidget()" style="background:none; border:none; color:var(--text); cursor:pointer; font-weight:bold;">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg bot">Hello! I am your offline Eco AI assistant. Ask me anything about carbon reduction, transport, diet, or tips to lower your footprint!</div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Ask about eco tips..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+        <button onclick="sendChatMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    let pendingEntry = null;
+    let trendChartInstance = null; 
+    let historyData = JSON.parse(localStorage.getItem('ecoTrackHistory')) || [];
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    // Tree Animation Canvas Engine
+    let treeState = { health: 1.0, swayAngle: 0, apples: false, golden: false, wilting: false };
+    let animFrame = null;
+
+    function initTreeAnimation() {
+        const canvas = document.getElementById('treeCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        let t = 0;
+        function drawTree() {
+            t += 0.03;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const baseY = canvas.height - 15;
+            
+            // Sway calculation
+            const sway = Math.sin(t) * (treeState.wilting ? 0.02 : 0.08);
+
+            // Ground Line
+            ctx.beginPath();
+            ctx.ellipse(centerX, baseY, 80, 10, 0, 0, Math.PI * 2);
+            ctx.fillStyle = treeState.golden ? 'rgba(234, 179, 8, 0.2)' : 'rgba(16, 185, 129, 0.2)';
+            ctx.fill();
+
+            // Trunk
+            ctx.save();
+            ctx.translate(centerX, baseY);
+            ctx.rotate(sway);
+            
+            ctx.beginPath();
+            ctx.moveTo(-12, 0);
+            ctx.lineTo(-8, -50);
+            ctx.lineTo(8, -50);
+            ctx.lineTo(12, 0);
+            ctx.fillStyle = '#78350f';
+            ctx.fill();
+
+            // Branches / Foliage Base
+            const leafColor = treeState.golden 
+                ? '#f59e0b' 
+                : (treeState.wilting ? '#a16207' : '#10b981');
+            const leafColorDark = treeState.golden 
+                ? '#d97706' 
+                : (treeState.wilting ? '#78350f' : '#047857');
+
+            // Bottom Foliage Circle
+            ctx.beginPath();
+            ctx.arc(-22, -60, 28, 0, Math.PI * 2);
+            ctx.arc(22, -60, 28, 0, Math.PI * 2);
+            ctx.fillStyle = leafColorDark;
+            ctx.fill();
+
+            // Main Foliage Top Circle
+            ctx.beginPath();
+            ctx.arc(0, -85, 36, 0, Math.PI * 2);
+            ctx.fillStyle = leafColor;
+            ctx.fill();
+
+            // Cartoon Eyes / Face on Tree
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(-8, -82, 5, 0, Math.PI * 2);
+            ctx.arc(8, -82, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(-7, -82, 2.5, 0, Math.PI * 2);
+            ctx.arc(9, -82, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Smile or Sad Mouth
+            ctx.beginPath();
+            if (treeState.wilting) {
+                ctx.arc(0, -70, 4, Math.PI, 0, false);
+            } else {
+                ctx.arc(0, -74, 5, 0, Math.PI, false);
+            }
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Fruit / Blossoms
+            if (treeState.apples && !treeState.wilting) {
+                const fruits = [
+                    {x: -18, y: -90}, {x: 18, y: -90}, {x: -25, y: -65}, {x: 25, y: -65}, {x: 0, y: -105}
+                ];
+                fruits.forEach(f => {
+                    ctx.beginPath();
+                    ctx.arc(f.x, f.y, 4.5, 0, Math.PI * 2);
+                    ctx.fillStyle = treeState.golden ? '#ffffff' : '#ef4444';
+                    ctx.fill();
+                });
+            }
+
+            // Falling Leaf particle effect if wilting
+            if (treeState.wilting) {
+                let leafY = (t * 20) % 50;
+                let leafX = Math.sin(t * 2) * 15;
+                ctx.beginPath();
+                ctx.ellipse(leafX, -30 + leafY, 4, 2, Math.PI / 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#a16207';
+                ctx.fill();
+            }
+
+            ctx.restore();
+            animFrame = requestAnimationFrame(drawTree);
+        }
+
+        if (animFrame) cancelAnimationFrame(animFrame);
+        drawTree();
+    }
+
+    function updateTreeState(net, offset) {
+        const textEl = document.getElementById('treeStatusText');
+        if (net < 0) {
+            treeState = { health: 1.0, apples: true, golden: true, wilting: false };
+            textEl.innerText = "🌟 Golden Super-Blooming Tree!";
+            textEl.style.color = "var(--primary)";
+        } else if (net === 0) {
+            treeState = { health: 1.0, apples: true, golden: false, wilting: false };
+            textEl.innerText = "🍎 Flowering & Thriving!";
+            textEl.style.color = "var(--primary)";
+        } else if (net <= 12) {
+            treeState = { health: 0.8, apples: false, golden: false, wilting: false };
+            textEl.innerText = "🌱 Healthy & Growing";
+            textEl.style.color = "var(--primary)";
+        } else {
+            treeState = { health: 0.3, apples: false, golden: false, wilting: true };
+            textEl.innerText = "🍂 Over-Emitted! Tree Wilting";
+            textEl.style.color = "var(--danger)";
+        }
+    }
+
+    // Advanced Synthesized Web Audio API Sound System
+    function getAudioContext() {
+        if (!audioCtx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        return audioCtx;
+    }
+
+    function triggerVibration(pattern) {
+        if ('vibrate' in navigator) {
+            try { navigator.vibrate(pattern); } catch (e) {}
+        }
+    }
+
+    function playUIFeedback(type) {
+        if (!soundEnabled) return;
+        const ctx = getAudioContext();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+
+        switch (type) {
+            case 'click': {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(900, now);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.03);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.03);
+                triggerVibration(8);
+                break;
+            }
+
+            case 'preset': {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(520, now);
+                osc.frequency.exponentialRampToValueAtTime(1040, now + 0.08);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.08);
+                triggerVibration(12);
+                break;
+            }
+
+            case 'treeAdd': {
+                // Organic Chime Sweep for Tree Planting
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    const startTime = now + (idx * 0.04);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, startTime);
+                    gain.gain.setValueAtTime(0.2, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.15);
+                });
+                triggerVibration([10, 20, 10]);
+                break;
+            }
+
+            case 'calculate': {
+                // Dual Oscillator Harmonic Chord Sweep
+                [440, 554.37, 659.25].forEach((freq) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now);
+                    osc.frequency.exponentialRampToValueAtTime(freq * 1.5, now + 0.18);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.18);
+                });
+                triggerVibration([15, 30, 15]);
+                break;
+            }
+
+            case 'success': {
+                // Fanfare Arpeggio
+                const chord = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+                chord.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    const startTime = now + (idx * 0.06);
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, startTime);
+                    gain.gain.setValueAtTime(0.3, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.3);
+                });
+                triggerVibration([30, 50, 30, 50, 50]);
+                break;
+            }
+
+            case 'delete': {
+                // Noise Sweep / Downwards Pitch Drop
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(60, now + 0.25);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+                triggerVibration([80, 40, 80]);
+                break;
+            }
+
+            case 'badge': {
+                const arpeggio = [440, 554.37, 659.25, 880, 1108.73, 1318.51];
+                arpeggio.forEach((freq, idx) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    const startTime = now + (idx * 0.06);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, startTime);
+                    gain.gain.setValueAtTime(0.35, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.35);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.35);
+                });
+                triggerVibration([40, 40, 40, 40, 100]);
+                break;
+            }
+        }
+    }
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        const btn = document.getElementById('soundToggleBtn');
+        btn.innerText = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+        if (soundEnabled) playUIFeedback('click');
+    }
+
+    window.onload = function() {
+        if (localStorage.getItem('ecoTheme') === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
+            document.getElementById('themeBtn').innerText = '☀️ Light Mode';
+        }
+        
+        const today = new Date();
+        const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        document.getElementById('entryDate').value = localDate;
+
+        initTreeAnimation();
+        renderHistory();
+        renderChart(); 
+        updateGamification(false);
+    };
+
+    function toggleTheme() {
+        playUIFeedback('click');
+        let isDark = document.body.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+            document.body.removeAttribute('data-theme');
+            localStorage.setItem('ecoTheme', 'light');
+            document.getElementById('themeBtn').innerText = '🌙 Dark Mode';
+        } else {
+            document.body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('ecoTheme', 'dark');
+            document.getElementById('themeBtn').innerText = '☀️ Light Mode';
+        }
+        renderChart(); 
+    }
+
+    function setDist(val) {
+        playUIFeedback('preset');
+        let currentVal = parseFloat(document.getElementById('dist').value) || 0;
+        let newVal = val === 0 ? 0 : currentVal + val;
+        document.getElementById('dist').value = newVal;
+        document.getElementById('distLabel').innerText = newVal + ' km';
+    }
+
+    function showToast(msg, isSuccess = true) {
+        let toast = document.getElementById('toastBox');
+        toast.innerText = msg;
+        toast.style.borderLeftColor = isSuccess ? 'var(--primary)' : 'var(--danger)';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function openKnowledgeModal() {
+        playUIFeedback('click');
+        document.getElementById('knowledgeModal').classList.add('active');
+    }
+    function confirmClearHistory() {
+        playUIFeedback('delete');
+        document.getElementById('confirmModal').classList.add('active');
+    }
+    function closeModal(id) {
+        playUIFeedback('click');
+        document.getElementById(id).classList.remove('active');
+    }
+    function executeClearHistory() {
+        playUIFeedback('delete');
+        historyData = [];
+        localStorage.setItem('ecoTrackHistory', JSON.stringify([]));
+        renderHistory();
+        renderChart();
+        updateGamification(false);
+        updateTreeState(10, 0);
+        closeModal('confirmModal');
+        showToast("All data cleared successfully.", false);
+    }
+
+    function triggerConfetti() {
+        var duration = 2000;
+        var end = Date.now() + duration;
+
+        (function frame() {
+            confetti({ particleCount: 4, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#10b981', '#34d399', '#ffffff'] });
+            confetti({ particleCount: 4, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#10b981', '#34d399', '#ffffff'] });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+    }
+
+    function animateValue(id, start, end, duration) {
+        let obj = document.getElementById(id);
+        let range = end - start;
+        let minTimer = 50;
+        let stepTime = Math.abs(Math.floor(duration / (range || 1)));
+        stepTime = Math.max(stepTime, minTimer);
+        let startTime = new Date().getTime();
+        let endTime = startTime + duration;
+        let timer;
+
+        function run() {
+            let now = new Date().getTime();
+            let remaining = Math.max((endTime - now) / duration, 0);
+            let value = (end - (remaining * range)).toFixed(2);
+            obj.innerHTML = value;
+            if (value == end) {
+                clearInterval(timer);
+            }
+        }
+        timer = setInterval(run, stepTime);
+        run();
+    }
+
+    function calculatePreview() {
+        playUIFeedback('calculate');
+        let entryDate = document.getElementById('entryDate').value;
+        if (!entryDate) {
+            showToast("Please select a date first!", false);
+            return;
+        }
+
+        let dist = parseFloat(document.getElementById('dist').value) || 0;
+        let tMode = parseFloat(document.getElementById('transportMode').value);
+        let power = parseFloat(document.getElementById('power').value) || 0;
+        let powerFactor = parseFloat(document.getElementById('energySource').value);
+        let diet = parseFloat(document.getElementById('dietType').value);
+        let waste = parseFloat(document.getElementById('wasteType').value);
+        let trees = parseFloat(document.getElementById('trees').value) || 0;
+
+        let travelCO2 = dist * tMode;
+        let powerCO2 = power * powerFactor; 
+        let dietWasteCO2 = diet + waste;
+        let dailyOffsetPerTree = 21.77 / 365; 
+        let offsetCO2 = trees * dailyOffsetPerTree;
+        
+        let grossCO2 = travelCO2 + powerCO2 + dietWasteCO2;
+        let netCO2 = grossCO2 - offsetCO2;
+
+        pendingEntry = {
+            id: Date.now(),
+            date: entryDate,
+            travel: travelCO2.toFixed(2),
+            power: powerCO2.toFixed(2),
+            dietWaste: dietWasteCO2.toFixed(2),
+            offset: offsetCO2.toFixed(2),
+            net: netCO2.toFixed(2)
+        };
+
+        updateUI(netCO2, travelCO2, powerCO2, dietWasteCO2, offsetCO2, grossCO2);
+        generateDynamicTip(travelCO2, powerCO2, dietWasteCO2, netCO2);
+        updateTreeState(netCO2, offsetCO2);
+        
+        document.getElementById('saveBtn').disabled = false;
+    }
+
+    function updateUI(net, travel, power, dietWaste, offset, gross) {
+        let currentScore = parseFloat(document.getElementById('netScore').innerText) || 0;
+        animateValue('netScore', currentScore, net.toFixed(2), 800);
+        
+        let goal = parseFloat(document.getElementById('dailyGoal').value) || 12;
+        let displayNet = net < 0 ? 0 : net; 
+        let percentage = Math.round((displayNet / goal) * 100);
+        
+        const badge = document.getElementById('statusBadge');
+        const tracker = document.getElementById('goalTracker');
+        const scoreNumber = document.getElementById('netScore');
+        const circle = document.getElementById('gaugeCircle');
+        
+        tracker.innerText = `${percentage}% of daily limit (${goal}kg)`;
+
+        let strokeDash = Math.max(0, 440 - (440 * Math.min(percentage, 100)) / 100);
+        circle.style.strokeDashoffset = strokeDash;
+
+        if (net < 0) {
+            badge.innerText = "Carbon Negative 🌟";
+            badge.style.background = "var(--primary)";
+            badge.style.color = "white";
+            scoreNumber.style.color = "var(--primary)";
+            circle.style.stroke = "var(--primary)";
+        } else if (net === 0) {
+            badge.innerText = "Carbon Neutral 🏆";
+            badge.style.background = "var(--primary-light)";
+            badge.style.color = "var(--primary-hover)";
+            scoreNumber.style.color = "var(--primary-hover)";
+            circle.style.stroke = "var(--primary)";
+        } else if (percentage <= 100) {
+            badge.innerText = "On Track 👍";
+            badge.style.background = "var(--primary-light)";
+            badge.style.color = "var(--primary-hover)";
+            scoreNumber.style.color = "var(--text)";
+            circle.style.stroke = "var(--primary)";
+        } else {
+            badge.innerText = "Over Limit ⚠️";
+            badge.style.background = "rgba(239, 68, 68, 0.1)";
+            badge.style.color = "var(--danger)";
+            scoreNumber.style.color = "var(--danger)";
+            circle.style.stroke = "var(--danger)";
+        }
+        
+        document.getElementById('tVal').innerText = travel.toFixed(2) + ' kg';
+        document.getElementById('pVal').innerText = power.toFixed(2) + ' kg';
+        document.getElementById('wdVal').innerText = dietWaste.toFixed(2) + ' kg';
+        document.getElementById('offsetVal').innerText = offset.toFixed(2) + ' kg';
+        
+        let maxVal = gross > 0 ? gross : 1;
+        document.getElementById('tBar').style.width = Math.min((travel / maxVal) * 100, 100) + '%';
+        document.getElementById('pBar').style.width = Math.min((power / maxVal) * 100, 100) + '%';
+        document.getElementById('wdBar').style.width = Math.min((dietWaste / maxVal) * 100, 100) + '%';
+        document.getElementById('offsetBar').style.width = Math.min((offset / maxVal) * 100, 100) + '%';
+    }
+
+    function generateDynamicTip(travel, power, dietWaste, net) {
+        let tipBox = document.getElementById('ecoTip');
+        if (net < 0) {
+            tipBox.innerHTML = "<strong>🌟 Phenomenal!</strong> You are carbon negative today. You are actively healing the planet!";
+        } else if (net === 0) {
+            tipBox.innerHTML = "<strong>🏆 Perfect Balance!</strong> You have completely neutralized your footprint. Great job!";
+        } else if (travel > power && travel > dietWaste) {
+            tipBox.innerHTML = "<strong>💡 Tip:</strong> Transport is your highest emission. Consider carpooling, biking, or public transit tomorrow!";
+        } else if (power > travel && power > dietWaste) {
+            tipBox.innerHTML = "<strong>💡 Tip:</strong> Energy use is high today. Try turning off idle appliances or switching to LED bulbs.";
+        } else {
+            tipBox.innerHTML = "<strong>💡 Tip:</strong> Starting to compost food waste reduces landfill methane gas down to almost zero!";
+        }
+    }
+
+    function saveCalculatedEntry() {
+        if (!pendingEntry) return;
+
+        playUIFeedback('success');
+
+        let goal = parseFloat(document.getElementById('dailyGoal').value) || 12;
+        if (parseFloat(pendingEntry.net) <= goal) {
+            triggerConfetti();
+        }
+
+        historyData = historyData.filter(item => item.date !== pendingEntry.date);
+        historyData.push(pendingEntry);
+        historyData.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        localStorage.setItem('ecoTrackHistory', JSON.stringify(historyData));
+        
+        renderHistory();
+        renderChart();
+        updateGamification(true);
+        
+        pendingEntry = null;
+        document.getElementById('saveBtn').disabled = true;
+        showToast("Entry saved to dashboard!");
+    }
+
+    function renderHistory() {
+        const tbody = document.getElementById('historyTableBody');
+        const filter = (document.getElementById('searchInput')?.value || '').toLowerCase();
+        tbody.innerHTML = '';
+        
+        let filteredData = historyData.filter(item => item.date.toLowerCase().includes(filter));
+
+        if (filteredData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 30px;">No matching entries found.</td></tr>';
+            return;
+        }
+
+        filteredData.forEach((entry, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-weight: 600;">${entry.date}</td>
+                <td>${entry.travel}</td>
+                <td>${entry.power}</td>
+                <td>${entry.dietWaste}</td>
+                <td style="color: var(--primary); font-weight: 600;">-${entry.offset}</td>
+                <td style="font-weight: bold; color: ${entry.net < 0 ? 'var(--primary)' : 'inherit'};">${entry.net} kg</td>
+                <td><button class="btn-delete" onclick="deleteEntry(${index})">Delete</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function deleteEntry(index) {
+        playUIFeedback('delete');
+        historyData.splice(index, 1);
+        localStorage.setItem('ecoTrackHistory', JSON.stringify(historyData));
+        renderHistory();
+        renderChart();
+        updateGamification(false);
+        showToast("Entry deleted.", false);
+    }
+
+    function updateGamification(triggerSound = false) {
+        let streak = 0;
+        let dates = historyData.map(d => d.date).sort().reverse();
+        if (dates.length > 0) {
+            streak = 1;
+            for (let i = 0; i < dates.length - 1; i++) {
+                let d1 = new Date(dates[i]);
+                let d2 = new Date(dates[i+1]);
+                let diffTime = Math.abs(d1 - d2);
+                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays === 1) streak++;
+                else break;
+            }
+        }
+        document.getElementById('streakCount').innerText = streak + (streak === 1 ? " Day" : " Days");
+
+        let badgeUnlockedNow = false;
+
+        function checkBadge(elementId, condition) {
+            let el = document.getElementById(elementId);
+            if (condition) {
+                if (!el.classList.contains('unlocked')) {
+                    el.classList.add('unlocked');
+                    badgeUnlockedNow = true;
+                }
+            } else {
+                el.classList.remove('unlocked');
+            }
+        }
+
+        checkBadge('badgeRookie', historyData.length >= 1);
+        checkBadge('badgeNeutral', historyData.some(d => parseFloat(d.net) <= 0));
+        checkBadge('badgeOffset', historyData.some(d => parseFloat(d.offset) > 0));
+        checkBadge('badgeStreak', streak >= 5);
+
+        if (triggerSound && badgeUnlockedNow) {
+            setTimeout(() => playUIFeedback('badge'), 300);
+        }
+    }
+
+    function exportCSV() {
+        playUIFeedback('click');
+        if (historyData.length === 0) {
+            showToast("No data to export.", false);
+            return;
+        }
+        let csvContent = "data:text/csv;charset=utf-8,Date,Transport,Power,DietAndWaste,Offset,NetTotal\n" 
+            + historyData.map(e => `${e.date},${e.travel},${e.power},${e.dietWaste},${e.offset},${e.net}`).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "eco_track_data.csv");
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        showToast("CSV Export downloaded!");
+    }
+
+    function exportData() {
+        playUIFeedback('click');
+        if(historyData.length === 0) {
+            showToast("No data to export.", false);
+            return;
+        }
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(historyData, null, 2));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "eco_track_history.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        showToast("JSON Data exported!");
+    }
+
+    function importData(event) {
+        playUIFeedback('click');
+        const fileReader = new FileReader();
+        fileReader.onload = function(e) {
+            try {
+                const imported = JSON.parse(e.target.result);
+                if (Array.isArray(imported)) {
+                    historyData = imported;
+                    localStorage.setItem('ecoTrackHistory', JSON.stringify(historyData));
+                    renderHistory();
+                    renderChart();
+                    updateGamification(true);
+                    showToast("Data imported successfully!");
+                } else {
+                    showToast("Invalid JSON file structure.", false);
+                }
+            } catch(err) {
+                showToast("Failed to parse JSON file.", false);
+            }
+        };
+        if(event.target.files[0]) fileReader.readAsText(event.target.files[0]);
+    }
+
+    function renderChart() {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        if (trendChartInstance) trendChartInstance.destroy();
+
+        let chartData = [...historyData].slice(0, 7).sort((a, b) => new Date(a.date) - new Date(b.date));
+        const labels = chartData.map(d => d.date.substring(5)); 
+        const data = chartData.map(d => parseFloat(d.net));
+
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#94a3b8' : '#64748b';
+        const gridColor = isDark ? '#1e293b' : '#e2e8f0';
+
+        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+        gradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+        trendChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Net Emissions (kg CO₂e)',
+                    data: data,
+                    borderColor: '#10b981',
+                    backgroundColor: gradient,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#fff',
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: textColor, font: { family: "'Plus Jakarta Sans', sans-serif" } }, grid: { color: gridColor, drawBorder: false } },
+                    y: { ticks: { color: textColor, font: { family: "'Plus Jakarta Sans', sans-serif" } }, grid: { color: gridColor, drawBorder: false }, beginAtZero: true }
+                },
+                animation: { duration: 1500, easing: 'easeOutQuart' }
+            }
+        });
+    }
+
+    // Local Rule-Based AI Chatbot Logic
+    function toggleChatWidget() {
+        playUIFeedback('click');
+        document.getElementById('chatWidget').classList.toggle('active');
+    }
+
+    function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if(!text) return;
+
+        playUIFeedback('click');
+        addChatMessage(text, 'user');
+        input.value = '';
+
+        setTimeout(() => {
+            const reply = getBotReply(text);
+            addChatMessage(reply, 'bot');
+            playUIFeedback('preset');
+        }, 300);
+    }
+
+    function addChatMessage(text, sender) {
+        const container = document.getElementById('chatMessages');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `chat-msg ${sender}`;
+        msgDiv.innerText = text;
+        container.appendChild(msgDiv);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function getBotReply(msg) {
+        const m = msg.toLowerCase();
+
+        if (m.includes('hello') || m.includes('hi') || m.includes('hey')) {
+            return "Hello! How can I help you reduce your carbon footprint today?";
+        }
+        if (m.includes('transport') || m.includes('car') || m.includes('bus') || m.includes('drive') || m.includes('travel')) {
+            return "Driving a petrol car emits ~0.21 kg CO₂e per km. Switching to public transit, EV, or biking drastically cuts down emissions!";
+        }
+        if (m.includes('diet') || m.includes('food') || m.includes('meat') || m.includes('vegan')) {
+            return "Meat-heavy diets produce ~7.2 kg CO₂e daily, while vegan diets produce only ~2.9 kg. Shifting toward plant-based meals saves up to 1.5 tons of CO₂ per year!";
+        }
+        if (m.includes('energy') || m.includes('power') || m.includes('electricity') || m.includes('solar')) {
+            return "Standard grid electricity releases ~0.85 kg CO₂e per kWh. Solar or renewable power reduces this to ~0.04 kg CO₂e per kWh.";
+        }
+        if (m.includes('tree') || m.includes('offset') || m.includes('plant')) {
+            return "A mature tree absorbs about 21.77 kg of CO₂ annually (around 0.06 kg every day). Planting trees helps compensate for unavoidable daily emissions!";
+        }
+        if (m.includes('waste') || m.includes('recycle') || m.includes('compost')) {
+            return "Landfilling organic waste creates methane (~0.80 kg CO₂e/day). Composting food waste cuts those methane emissions down to under 0.05 kg CO₂e/day.";
+        }
+        if (m.includes('target') || m.includes('goal') || m.includes('limit') || m.includes('average')) {
+            return "The current global average carbon footprint is ~12 kg CO₂e/day per person. Aiming under 5.5 kg CO₂e/day aligns with sustainable global targets!";
+        }
+        if (m.includes('tip') || m.includes('reduce') || m.includes('lower') || m.includes('help')) {
+            return "Top 3 tips:\n1. Use public transit or bike for short trips.\n2. Incorporate more plant-based meals.\n3. Compost organic waste to eliminate landfill methane.";
+        }
+
+        return "I'm a local Eco AI! You can ask me about transport emissions, diet choices, energy saving, tree offsets, waste management, or recommended daily targets.";
+    }
+</script>
+
+</body>
+</html>
