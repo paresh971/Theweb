@@ -10,6 +10,8 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- jsPDF for PDF Report Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root { 
@@ -73,9 +75,11 @@
         .slogan { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; margin-top: 4px; line-height: 1.4; }
         
         .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-        .btn-theme, .btn-knowledge, .btn-sound { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text); padding: 10px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 600; flex-shrink: 0; white-space: nowrap; transition: all 0.25s ease; }
+        .btn-theme, .btn-knowledge, .btn-sound, .btn-lang, .btn-voice, .btn-pdf { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text); padding: 10px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 600; flex-shrink: 0; white-space: nowrap; transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 6px; }
         .btn-knowledge { background: var(--primary-light); color: var(--primary-hover); border-color: var(--primary); }
-        .btn-theme:hover, .btn-knowledge:hover, .btn-sound:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--primary-light); }
+        .btn-theme:hover, .btn-knowledge:hover, .btn-sound:hover, .btn-lang:hover, .btn-voice:hover, .btn-pdf:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--primary-light); }
+        
+        .lang-select { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; outline: none; cursor: pointer; }
 
         @media (max-width: 600px) {
             header { flex-direction: column; align-items: stretch; }
@@ -145,8 +149,9 @@
         .progress-track { background: var(--border); height: 8px; border-radius: 10px; overflow: hidden; margin-bottom: 12px; }
         .progress-fill { height: 100%; width: 0%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        .tip-box { background: var(--surface-hover); border-left: 4px solid var(--primary); padding: 14px 16px; border-radius: 0 10px 10px 0; font-size: 0.85rem; margin-top: 16px; color: var(--text-muted); line-height: 1.5; animation: slideUp 0.5s ease-out; }
+        .tip-box { background: var(--surface-hover); border-left: 4px solid var(--primary); padding: 14px 16px; border-radius: 0 10px 10px 0; font-size: 0.85rem; margin-top: 16px; color: var(--text-muted); line-height: 1.5; animation: slideUp 0.5s ease-out; position: relative; }
         .tip-box strong { color: var(--text); display: block; margin-bottom: 4px; }
+        .tts-btn { position: absolute; top: 12px; right: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
 
         .chart-container { position: relative; height: 230px; width: 100%; }
         
@@ -185,16 +190,18 @@
         /* Floating AI Chatbot Widget Styles */
         .chat-toggle-btn { position: fixed; bottom: 24px; left: 24px; width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; z-index: 2900; transition: transform 0.25s ease, background-color 0.25s ease; }
         .chat-toggle-btn:hover { transform: scale(1.08); background: var(--primary-hover); }
-        .chat-widget { position: fixed; bottom: 90px; left: 24px; width: 340px; height: 460px; max-width: calc(100vw - 48px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; z-index: 2900; opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.95); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .chat-widget { position: fixed; bottom: 90px; left: 24px; width: 340px; height: 480px; max-width: calc(100vw - 48px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; z-index: 2900; opacity: 0; pointer-events: none; transform: translateY(20px) scale(0.95); transition: opacity 0.3s ease, transform 0.3s ease; }
         .chat-widget.active { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
         .chat-header { background: var(--surface-hover); padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.9rem; }
         .chat-messages { flex-grow: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 0.82rem; }
-        .chat-msg { max-width: 85%; padding: 8px 12px; border-radius: 12px; line-height: 1.4; word-wrap: break-word; }
-        .chat-msg.bot { background: var(--surface-hover); color: var(--text); border-bottom-left-radius: 2px; align-self: flex-start; border: 1px solid var(--border); }
+        .chat-msg { max-width: 85%; padding: 8px 12px; border-radius: 12px; line-height: 1.4; word-wrap: break-word; position: relative; }
+        .chat-msg.bot { background: var(--surface-hover); color: var(--text); border-bottom-left-radius: 2px; align-self: flex-start; border: 1px solid var(--border); padding-right: 28px; }
         .chat-msg.user { background: var(--primary); color: white; border-bottom-right-radius: 2px; align-self: flex-end; }
-        .chat-input-area { display: flex; padding: 10px; border-top: 1px solid var(--border); gap: 6px; background: var(--surface); }
-        .chat-input-area input { flex-grow: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 0.82rem; outline: none; }
-        .chat-input-area button { background: var(--primary); color: white; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.82rem; }
+        .chat-msg-tts { position: absolute; bottom: 6px; right: 6px; background: transparent; border: none; cursor: pointer; font-size: 0.75rem; color: var(--text-muted); }
+        .chat-input-area { display: flex; padding: 10px; border-top: 1px solid var(--border); gap: 6px; background: var(--surface); align-items: center; }
+        .chat-input-area input { flex-grow: 1; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 0.82rem; outline: none; }
+        .chat-input-btn { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+        .chat-input-btn:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -204,13 +211,20 @@
         <div class="brand">
             <div class="brand-icon">🌱</div>
             <div class="brand-text">
-                <h1>EcoTrack Pro <span class="version-badge">v7.0</span></h1>
-                <p class="slogan">Track, reduce, and offset your daily carbon footprint.</p>
+                <h1 id="brandTitle">EcoTrack Pro <span class="version-badge">ps9</span></h1>
+                <p class="slogan" id="brandSlogan">Track, reduce, and offset your daily carbon footprint.</p>
             </div>
         </div>
         <div class="header-actions">
+            <select id="langSelect" class="lang-select" onchange="changeLanguage(this.value)">
+                <option value="en">English</option>
+                <option value="hi">हिंदी (Hindi)</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+            </select>
+            <button class="btn-voice" id="voiceBtn" onclick="startVoiceInput()" title="Voice Input">🎙️ Speak</button>
             <button class="btn-sound" id="soundToggleBtn" onclick="toggleSound()">🔊 Sound: ON</button>
-            <button class="btn-knowledge" onclick="openKnowledgeModal()">📚 Eco Knowledge Hub</button>
+            <button class="btn-knowledge" onclick="openKnowledgeModal()" id="knowledgeBtn">📚 Knowledge</button>
             <button class="btn-theme" id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
         </div>
     </header>
@@ -220,7 +234,7 @@
             <span class="streak-icon">🔥</span>
             <div>
                 <div class="streak-val" id="streakCount">0 Days</div>
-                <div class="streak-label">Logging Streak</div>
+                <div class="streak-label" id="streakLabelText">Logging Streak</div>
             </div>
         </div>
         <div class="badge-list">
@@ -234,76 +248,76 @@
     <div class="dashboard-grid">
         <div class="card">
             <div>
-                <div class="card-header"><span class="card-title">Log Daily Metrics</span></div>
+                <div class="card-header"><span class="card-title" id="logCardTitle">Log Daily Metrics</span></div>
                 
                 <div class="form-group">
-                    <div class="form-label">📅 Entry Date</div>
+                    <div class="form-label" id="dateLabelText">📅 Entry Date</div>
                     <input type="date" id="entryDate" onchange="playUIFeedback('click')">
                 </div>
                 
                 <div class="form-group">
-                    <div class="form-label"><span>🚗 Travel Distance</span><span id="distLabel">0 km</span></div>
+                    <div class="form-label"><span id="distText">🚗 Travel Distance</span><span id="distLabel">0 km</span></div>
                     <input type="number" id="dist" min="0" value="0" oninput="document.getElementById('distLabel').innerText = this.value + ' km'; playUIFeedback('click');">
                     <div class="quick-presets">
-                        <button class="chip" onclick="setDist(0)">WFH (0km)</button>
+                        <button class="chip" onclick="setDist(0)" id="presetWfh">WFH (0km)</button>
                         <button class="chip" onclick="setDist(10)">+10 km</button>
                         <button class="chip" onclick="setDist(25)">+25 km</button>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <div class="form-label">Mode of Transport</div>
+                    <div class="form-label" id="transportText">Mode of Transport</div>
                     <select id="transportMode" onchange="playUIFeedback('click')">
-                        <option value="0.21">Petrol Car (~0.21 kg/km)</option>
-                        <option value="0.05">Electric Vehicle (~0.05 kg/km)</option>
-                        <option value="0.08">Public Bus / Metro (~0.08 kg/km)</option>
-                        <option value="0">Walk / Bicycle (0.00 kg/km)</option>
+                        <option value="0.21" id="tr1">Petrol Car (~0.21 kg/km)</option>
+                        <option value="0.05" id="tr2">Electric Vehicle (~0.05 kg/km)</option>
+                        <option value="0.08" id="tr3">Public Bus / Metro (~0.08 kg/km)</option>
+                        <option value="0" id="tr4">Walk / Bicycle (0.00 kg/km)</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <div class="form-label"><span>⚡ Energy Consumption</span><span id="powerLabel">0 kWh</span></div>
+                    <div class="form-label"><span id="energyText">⚡ Energy Consumption</span><span id="powerLabel">0 kWh</span></div>
                     <input type="number" id="power" min="0" value="0" oninput="document.getElementById('powerLabel').innerText = this.value + ' kWh'; playUIFeedback('click');">
                 </div>
 
                 <div class="form-group">
-                    <div class="form-label">Energy Source</div>
+                    <div class="form-label" id="energySourceText">Energy Source</div>
                     <select id="energySource" onchange="playUIFeedback('click')">
-                        <option value="0.85">Grid Electricity (~0.85 kg/kWh)</option>
-                        <option value="0.04">Solar / Renewable (~0.04 kg/kWh lifecycle)</option>
+                        <option value="0.85" id="en1">Grid Electricity (~0.85 kg/kWh)</option>
+                        <option value="0.04" id="en2">Solar / Renewable (~0.04 kg/kWh lifecycle)</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <div class="form-label">🍔 Diet Choice</div>
+                    <div class="form-label" id="dietText">🍔 Diet Choice</div>
                     <select id="dietType" onchange="playUIFeedback('click')">
-                        <option value="7.20">Meat Heavy (~7.2 kg/day)</option>
-                        <option value="4.50" selected>Balanced Mixed (~4.5 kg/day)</option>
-                        <option value="2.90">Vegan (~2.9 kg/day)</option>
+                        <option value="7.20" id="dt1">Meat Heavy (~7.2 kg/day)</option>
+                        <option value="4.50" selected id="dt2">Balanced Mixed (~4.5 kg/day)</option>
+                        <option value="2.90" id="dt3">Vegan (~2.9 kg/day)</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <div class="form-label">♻️ Waste Management Practice</div>
+                    <div class="form-label" id="wasteText">♻️ Waste Management Practice</div>
                     <select id="wasteType" onchange="playUIFeedback('click')">
-                        <option value="0.05">🌱 Composted Organics & Fully Recycled (~0.05 kg/day)</option>
-                        <option value="0.25">♻️ Separated Recyclables Only (~0.25 kg/day)</option>
-                        <option value="0.80" selected>🗑️ All Mixed into Landfill / Regular Trash (~0.80 kg/day)</option>
+                        <option value="0.05" id="wt1">🌱 Composted Organics & Fully Recycled (~0.05 kg/day)</option>
+                        <option value="0.25" id="wt2">♻️ Separated Recyclables Only (~0.25 kg/day)</option>
+                        <option value="0.80" selected id="wt3">🗑️ All Mixed into Landfill / Regular Trash (~0.80 kg/day)</option>
                     </select>
                 </div>
 
                 <div class="form-group" style="background: var(--primary-light); padding: 14px; border-radius: 10px; border: 1px dashed var(--primary); margin-top: 20px;">
                     <div class="form-label" style="color: var(--primary-hover);">
-                        <span>🌳 Trees Planted (Offsets)</span>
+                        <span id="treeText">🌳 Trees Planted (Offsets)</span>
                         <span id="treeLabel">0 trees</span>
                     </div>
                     <input type="number" id="trees" min="0" value="0" style="border-color: var(--primary);" oninput="document.getElementById('treeLabel').innerText = this.value + ' trees'; playUIFeedback('treeAdd');">
-                    <div style="font-size: 0.73rem; margin-top: 6px; color: var(--primary-hover); font-weight: 600;">*Calculates standard daily absorption (~0.06 kg/day)</div>
+                    <div style="font-size: 0.73rem; margin-top: 6px; color: var(--primary-hover); font-weight: 600;" id="treeSubText">*Calculates standard daily absorption (~0.06 kg/day)</div>
                 </div>
             </div>
 
             <div class="action-row">
-                <button class="btn-secondary" onclick="calculatePreview()">🧮 Calculate</button>
+                <button class="btn-secondary" onclick="calculatePreview()" id="calcBtnText">🧮 Calculate</button>
                 <button class="btn-primary" id="saveBtn" onclick="saveCalculatedEntry()" disabled>💾 Save Entry</button>
             </div>
         </div>
@@ -312,8 +326,8 @@
             <!-- Tree Animation Container -->
             <div class="card">
                 <div class="card-header">
-                    <span class="card-title">Eco Companion Tree</span>
-                    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Live Tree Status</span>
+                    <span class="card-title" id="companionTitle">Eco Companion Tree</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;" id="liveStatusText">Live Tree Status</span>
                 </div>
                 <div class="tree-avatar-box">
                     <canvas id="treeCanvas" width="220" height="160"></canvas>
@@ -322,9 +336,9 @@
 
                 <div>
                     <div class="card-header" style="margin-bottom: 12px; padding-bottom: 8px;">
-                        <span class="card-title">Daily Analytics</span>
+                        <span class="card-title" id="analyticsTitle">Daily Analytics</span>
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <span style="font-size: 0.8rem; font-weight: 600;">🎯 Goal:</span>
+                            <span style="font-size: 0.8rem; font-weight: 600;" id="goalLabelText">🎯 Goal:</span>
                             <input type="number" id="dailyGoal" value="12" style="width: 60px; padding: 6px; font-size: 0.85rem; text-align: center; border-radius: 6px;" onchange="calculatePreview()">
                         </div>
                     </div>
@@ -346,28 +360,29 @@
                     </div>
                     
                     <div class="metric-group">
-                        <div class="metric-header"><span>🚗 Transport Emissions</span><span id="tVal">0.00 kg</span></div>
+                        <div class="metric-header"><span id="mTrans">🚗 Transport Emissions</span><span id="tVal">0.00 kg</span></div>
                         <div class="progress-track"><div class="progress-fill" id="tBar" style="background: #3b82f6;"></div></div>
                         
-                        <div class="metric-header"><span>⚡ Energy Emissions</span><span id="pVal">0.00 kg</span></div>
+                        <div class="metric-header"><span id="mEner">⚡ Energy Emissions</span><span id="pVal">0.00 kg</span></div>
                         <div class="progress-track"><div class="progress-fill" id="pBar" style="background: #f59e0b;"></div></div>
 
-                        <div class="metric-header"><span>🗑️ Waste & Diet</span><span id="wdVal">0.00 kg</span></div>
+                        <div class="metric-header"><span id="mWaste">🗑️ Waste & Diet</span><span id="wdVal">0.00 kg</span></div>
                         <div class="progress-track"><div class="progress-fill" id="wdBar" style="background: #8b5cf6;"></div></div>
 
-                        <div class="metric-header"><span style="color: var(--primary);">🌳 Tree Offsets Applied</span><span id="offsetVal" style="color: var(--primary);">0.00 kg</span></div>
+                        <div class="metric-header"><span style="color: var(--primary);" id="mOffset">🌳 Tree Offsets Applied</span><span id="offsetVal" style="color: var(--primary);">0.00 kg</span></div>
                         <div class="progress-track"><div class="progress-fill" id="offsetBar" style="background: var(--primary);"></div></div>
                     </div>
                 </div>
 
                 <div class="tip-box" id="ecoTip">
+                    <button class="tts-btn" onclick="speakTip()" title="Read Tip Aloud">🔊</button>
                     <strong>💡 Eco Tip:</strong>
                     Enter your day's consumption metrics and click 'Calculate' to see tailored green tips!
                 </div>
             </div>
 
             <div class="card" style="flex-grow: 1;">
-                <div class="card-header"><span class="card-title">7-Day Carbon Trend</span></div>
+                <div class="card-header"><span class="card-title" id="trendTitle">7-Day Carbon Trend</span></div>
                 <div class="chart-container">
                     <canvas id="trendChart"></canvas>
                 </div>
@@ -377,9 +392,10 @@
 
     <div class="card history-card">
         <div class="card-header">
-            <span class="card-title">Activity Log</span>
+            <span class="card-title" id="activityTitle">Activity Log</span>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                 <input type="text" id="searchInput" placeholder="🔍 Search Date..." onkeyup="renderHistory()" style="padding: 6px 12px; font-size: 0.8rem; width: 140px;">
+                <button class="chip" onclick="downloadPDF()" style="color: var(--warning);" id="pdfBtnText">📥 Download PDF</button>
                 <button class="chip" onclick="exportCSV()" style="color: var(--info);">📊 Export CSV</button>
                 <button class="chip" onclick="exportData()" style="color: var(--info);">📥 Export JSON</button>
                 <button class="chip" onclick="document.getElementById('importFile').click()" style="color: var(--primary);">📤 Import</button>
@@ -391,13 +407,13 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Transport</th>
-                        <th>Energy</th>
-                        <th>Diet & Waste</th>
-                        <th style="color: var(--primary);">Offsets</th>
-                        <th>Net Total</th>
-                        <th>Action</th>
+                        <th id="thDate">Date</th>
+                        <th id="thTrans">Transport</th>
+                        <th id="thEner">Energy</th>
+                        <th id="thDiet">Diet & Waste</th>
+                        <th style="color: var(--primary);" id="thOffset">Offsets</th>
+                        <th id="thNet">Net Total</th>
+                        <th id="thAction">Action</th>
                     </tr>
                 </thead>
                 <tbody id="historyTableBody"></tbody>
@@ -464,11 +480,15 @@
         <button onclick="toggleChatWidget()" style="background:none; border:none; color:var(--text); cursor:pointer; font-weight:bold;">✕</button>
     </div>
     <div class="chat-messages" id="chatMessages">
-        <div class="chat-msg bot">Hello! I am your offline Eco AI assistant. Ask me anything about carbon reduction, transport, diet, or tips to lower your footprint!</div>
+        <div class="chat-msg bot">
+            Hello! I am your offline Eco AI assistant. Ask me anything about carbon reduction, transport, diet, or tips to lower your footprint!
+            <button class="chat-msg-tts" onclick="speakChatMessage(this)" title="Read Aloud">🔊</button>
+        </div>
     </div>
     <div class="chat-input-area">
         <input type="text" id="chatInput" placeholder="Ask about eco tips..." onkeypress="if(event.key==='Enter') sendChatMessage()">
-        <button onclick="sendChatMessage()">Send</button>
+        <button class="chat-input-btn" onclick="startChatVoiceInput()" title="Voice Input">🎙️</button>
+        <button class="chat-input-btn" onclick="sendChatMessage()" style="background: var(--primary); color: white;">Send</button>
     </div>
 </div>
 
@@ -478,6 +498,234 @@
     let historyData = JSON.parse(localStorage.getItem('ecoTrackHistory')) || [];
     let soundEnabled = true;
     let audioCtx = null;
+    let currentLang = 'en';
+
+    // Multi-Language Dictionary
+    const translations = {
+        en: {
+            title: "EcoTrack Pro", slogan: "Track, reduce, and offset your daily carbon footprint.",
+            logTitle: "Log Daily Metrics", dateText: "📅 Entry Date", distText: "🚗 Travel Distance",
+            transportText: "Mode of Transport", energyText: "⚡ Energy Consumption", energySourceText: "Energy Source",
+            dietText: "🍔 Diet Choice", wasteText: "♻️ Waste Management Practice", treeText: "🌳 Trees Planted (Offsets)",
+            calcBtn: "🧮 Calculate", saveBtn: "💾 Save Entry", companionTitle: "Eco Companion Tree",
+            liveStatusText: "Live Tree Status", analyticsTitle: "Daily Analytics", goalLabel: "🎯 Goal:",
+            mTrans: "🚗 Transport Emissions", mEner: "⚡ Energy Emissions", mWaste: "🗑️ Waste & Diet", mOffset: "🌳 Tree Offsets Applied",
+            trendTitle: "7-Day Carbon Trend", activityTitle: "Activity Log", pdfBtn: "📥 Download PDF",
+            thDate: "Date", thTrans: "Transport", thEner: "Energy", thDiet: "Diet & Waste", thOffset: "Offsets", thNet: "Net Total", thAction: "Action"
+        },
+        hi: {
+            title: "इकोट्रैक प्रो", slogan: "अपने दैनिक कार्बन पदचिह्न को ट्रैक, कम और ऑफसेट करें।",
+            logTitle: "दैनिक मीट्रिक लॉग करें", dateText: "📅 प्रविष्टि तिथि", distText: "🚗 यात्रा दूरी",
+            transportText: "परिवहन का साधन", energyText: "⚡ ऊर्जा की खपत", energySourceText: "ऊर्जा स्रोत",
+            dietText: "🍔 आहार विकल्प", wasteText: "♻️ अपशिष्ट प्रबंधन अभ्यास", treeText: "🌳 पेड़ लगाए गए (ऑफसेट)",
+            calcBtn: "🧮 गणना करें", saveBtn: "💾 सहेजें", companionTitle: "इको साथी वृक्ष",
+            liveStatusText: "लाइव ट्री स्थिति", analyticsTitle: "दैनिक विश्लेषण", goalLabel: "🎯 लक्ष्य:",
+            mTrans: "🚗 परिवहन उत्सर्जन", mEner: "⚡ ऊर्जा उत्सर्जन", mWaste: "🗑️ अपशिष्ट और आहार", mOffset: "🌳 पेड़ ऑफसेट लागू",
+            trendTitle: "7-दिवसीय कार्बन रुझान", activityTitle: "गतिविधि लॉग", pdfBtn: "📥 पीडीएफ डाउनलोड",
+            thDate: "तिथि", thTrans: "परिवहन", thEner: "ऊर्जा", thDiet: "आहार और अपशिष्ट", thOffset: "ऑफसेट", thNet: "शुद्ध कुल", thAction: "कार्रवाई"
+        },
+        es: {
+            title: "EcoTrack Pro", slogan: "Rastrea, reduce y compensa tu huella de carbono diaria.",
+            logTitle: "Registrar Métricas", dateText: "📅 Fecha de Entrada", distText: "🚗 Distancia de Viaje",
+            transportText: "Modo de Transporte", energyText: "⚡ Consumo de Energía", energySourceText: "Fuente de Energía",
+            dietText: "🍔 Opción de Dieta", wasteText: "♻️ Práctica de Gestión de Residuos", treeText: "🌳 Árboles Plantados (Compensación)",
+            calcBtn: "🧮 Calcular", saveBtn: "💾 Guardar", companionTitle: "Árbol Eco Compañero",
+            liveStatusText: "Estado del Árbol", analyticsTitle: "Análisis Diario", goalLabel: "🎯 Meta:",
+            mTrans: "🚗 Emisiones de Transporte", mEner: "⚡ Emisiones de Energía", mWaste: "🗑️ Residuos y Dieta", mOffset: "🌳 Compensaciones",
+            trendTitle: "Tendencia de 7 Días", activityTitle: "Registro de Actividad", pdfBtn: "📥 Descargar PDF",
+            thDate: "Fecha", thTrans: "Transporte", thEner: "Energía", thDiet: "Dieta y Residuo", thOffset: "Compensación", thNet: "Neto Total", thAction: "Acción"
+        },
+        fr: {
+            title: "EcoTrack Pro", slogan: "Suivez, réduisez et compensez votre empreinte carbone quotidienne.",
+            logTitle: "Enregistrer les métriques", dateText: "📅 Date d'entrée", distText: "🚗 Distance de voyage",
+            transportText: "Mode de transport", energyText: "⚡ Consommation d'énergie", energySourceText: "Source d'énergie",
+            dietText: "🍔 Choix de régime", wasteText: "♻️ Gestion des déchets", treeText: "🌳 Arbres plantés (Compensations)",
+            calcBtn: "🧮 Calculer", saveBtn: "💾 Enregistrer", companionTitle: "Arbre Compagnon Éco",
+            liveStatusText: "État de l'arbre en direct", analyticsTitle: "Analytique Quotidienne", goalLabel: "🎯 Objectif:",
+            mTrans: "🚗 Émissions de transport", mEner: "⚡ Émissions d'énergie", mWaste: "🗑️ Déchets & Régime", mOffset: "🌳 Compensations d'arbres",
+            trendTitle: "Tendance Carbone sur 7 jours", activityTitle: "Journal d'activité", pdfBtn: "📥 Télécharger PDF",
+            thDate: "Date", thTrans: "Transport", thEner: "Énergie", thDiet: "Déchets", thOffset: "Compensations", thNet: "Total Net", thAction: "Action"
+        }
+    };
+
+    function changeLanguage(lang) {
+        currentLang = lang;
+        const t = translations[lang];
+        document.getElementById('brandTitle').innerHTML = `${t.title} <span class="version-badge">ps9</span>`;
+        document.getElementById('brandSlogan').innerText = t.slogan;
+        document.getElementById('logCardTitle').innerText = t.logTitle;
+        document.getElementById('dateLabelText').innerText = t.dateText;
+        document.getElementById('distText').innerText = t.distText;
+        document.getElementById('transportText').innerText = t.transportText;
+        document.getElementById('energyText').innerText = t.energyText;
+        document.getElementById('energySourceText').innerText = t.energySourceText;
+        document.getElementById('dietText').innerText = t.dietText;
+        document.getElementById('wasteText').innerText = t.wasteText;
+        document.getElementById('treeText').innerText = t.treeText;
+        document.getElementById('calcBtnText').innerText = t.calcBtn;
+        document.getElementById('companionTitle').innerText = t.companionTitle;
+        document.getElementById('liveStatusText').innerText = t.liveStatusText;
+        document.getElementById('analyticsTitle').innerText = t.analyticsTitle;
+        document.getElementById('goalLabelText').innerText = t.goalLabel;
+        document.getElementById('mTrans').innerText = t.mTrans;
+        document.getElementById('mEner').innerText = t.mEner;
+        document.getElementById('mWaste').innerText = t.mWaste;
+        document.getElementById('mOffset').innerText = t.mOffset;
+        document.getElementById('trendTitle').innerText = t.trendTitle;
+        document.getElementById('activityTitle').innerText = t.activityTitle;
+        document.getElementById('pdfBtnText').innerText = t.pdfBtn;
+        document.getElementById('thDate').innerText = t.thDate;
+        document.getElementById('thTrans').innerText = t.thTrans;
+        document.getElementById('thEner').innerText = t.thEner;
+        document.getElementById('thDiet').innerText = t.thDiet;
+        document.getElementById('thOffset').innerText = t.thOffset;
+        document.getElementById('thNet').innerText = t.thNet;
+        document.getElementById('thAction').innerText = t.thAction;
+        showToast("Language updated successfully!");
+    }
+
+    // Voice Input (Speech-to-Text)
+    function startVoiceInput() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            showToast("Speech recognition is not supported in your browser.", false);
+            return;
+        }
+        const recognition = new SpeechRecognition();
+        recognition.lang = currentLang === 'hi' ? 'hi-IN' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'fr' ? 'fr-FR' : 'en-US'));
+        recognition.start();
+        showToast("Listening... Try saying 'Travel 15 kilometers' or 'Power 5'");
+
+        recognition.onresult = function(event) {
+            const speechText = event.results[0][0].transcript.toLowerCase();
+            showToast(`Heard: "${speechText}"`);
+            parseVoiceCommand(speechText);
+        };
+        recognition.onerror = function() {
+            showToast("Voice recognition failed. Please try again.", false);
+        };
+    }
+
+    // Chatbot Voice Input
+    function startChatVoiceInput() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            showToast("Speech recognition is not supported in your browser.", false);
+            return;
+        }
+        const recognition = new SpeechRecognition();
+        recognition.lang = currentLang === 'hi' ? 'hi-IN' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'fr' ? 'fr-FR' : 'en-US'));
+        recognition.start();
+        showToast("Listening for chat message...");
+
+        recognition.onresult = function(event) {
+            const speechText = event.results[0][0].transcript;
+            document.getElementById('chatInput').value = speechText;
+            sendChatMessage();
+        };
+        recognition.onerror = function() {
+            showToast("Voice recognition failed.", false);
+        };
+    }
+
+    // Chatbot Text-to-Speech (Voice Output)
+    function speakChatMessage(btnEl) {
+        const msgDiv = btnEl.parentElement;
+        const fullText = msgDiv.innerText.replace('🔊', '').trim();
+        if (!('speechSynthesis' in window)) {
+            showToast("Text-to-speech not supported.", false);
+            return;
+        }
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(fullText);
+        utterance.lang = currentLang === 'hi' ? 'hi-IN' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'fr' ? 'fr-FR' : 'en-US'));
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function parseVoiceCommand(text) {
+        const numbers = text.match(/\d+/g);
+        if (!numbers) return;
+        const val = parseFloat(numbers[0]);
+
+        if (text.includes('travel') || text.includes('distance') || text.includes('kilometer') || text.includes('km') || text.includes('दूरी') || text.includes('यात्रा')) {
+            document.getElementById('dist').value = val;
+            document.getElementById('distLabel').innerText = val + ' km';
+        } else if (text.includes('power') || text.includes('energy') || text.includes('electricity') || text.includes('ऊर्जा') || text.includes('बिजली')) {
+            document.getElementById('power').value = val;
+            document.getElementById('powerLabel').innerText = val + ' kWh';
+        } else if (text.includes('tree') || text.includes('plant') || text.includes('पेड़')) {
+            document.getElementById('trees').value = val;
+            document.getElementById('treeLabel').innerText = val + ' trees';
+        }
+        calculatePreview();
+    }
+
+    // Text-to-Speech (Dashboard Tips)
+    function speakTip() {
+        const tipText = document.getElementById('ecoTip').innerText.replace('🔊', '').trim();
+        if (!('speechSynthesis' in window)) {
+            showToast("Text-to-speech not supported.", false);
+            return;
+        }
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(tipText);
+        utterance.lang = currentLang === 'hi' ? 'hi-IN' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'fr' ? 'fr-FR' : 'en-US'));
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // PDF Report Generator using jsPDF
+    function downloadPDF() {
+        playUIFeedback('click');
+        if (historyData.length === 0) {
+            showToast("No data available to generate PDF report.", false);
+            return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(20);
+        doc.setTextColor(5, 150, 105);
+        doc.text("EcoTrack Pro - Carbon Footprint Report", 14, 20);
+
+        doc.setFont("Helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setTextColor(100, 116, 139);
+        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 28);
+
+        let y = 40;
+        doc.setFont("Helvetica", "bold");
+        doc.setTextColor(15, 23, 42);
+        doc.text("Date", 14, y);
+        doc.text("Transport", 45, y);
+        doc.text("Energy", 75, y);
+        doc.text("Diet/Waste", 105, y);
+        doc.text("Offsets", 135, y);
+        doc.text("Net Total", 165, y);
+        
+        y += 6;
+        doc.setLineWidth(0.5);
+        doc.line(14, y, 196, y);
+        y += 8;
+
+        doc.setFont("Helvetica", "normal");
+        historyData.forEach(item => {
+            if (y > 270) {
+                doc.addPage();
+                y = 20;
+            }
+            doc.text(String(item.date), 14, y);
+            doc.text(`${item.data || item.travel} kg`, 45, y);
+            doc.text(`${item.power} kg`, 75, y);
+            doc.text(`${item.dietWaste} kg`, 105, y);
+            doc.text(`-${item.offset} kg`, 135, y);
+            doc.text(`${item.net} kg`, 165, y);
+            y += 8;
+        });
+
+        doc.save("ecotrack_report.pdf");
+        showToast("PDF Report downloaded successfully!");
+    }
 
     // Tree Animation Canvas Engine
     let treeState = { health: 1.0, swayAngle: 0, apples: false, golden: false, wilting: false };
@@ -496,16 +744,13 @@
             const centerX = canvas.width / 2;
             const baseY = canvas.height - 15;
             
-            // Sway calculation
             const sway = Math.sin(t) * (treeState.wilting ? 0.02 : 0.08);
 
-            // Ground Line
             ctx.beginPath();
             ctx.ellipse(centerX, baseY, 80, 10, 0, 0, Math.PI * 2);
             ctx.fillStyle = treeState.golden ? 'rgba(234, 179, 8, 0.2)' : 'rgba(16, 185, 129, 0.2)';
             ctx.fill();
 
-            // Trunk
             ctx.save();
             ctx.translate(centerX, baseY);
             ctx.rotate(sway);
@@ -518,28 +763,20 @@
             ctx.fillStyle = '#78350f';
             ctx.fill();
 
-            // Branches / Foliage Base
-            const leafColor = treeState.golden 
-                ? '#f59e0b' 
-                : (treeState.wilting ? '#a16207' : '#10b981');
-            const leafColorDark = treeState.golden 
-                ? '#d97706' 
-                : (treeState.wilting ? '#78350f' : '#047857');
+            const leafColor = treeState.golden ? '#f59e0b' : (treeState.wilting ? '#a16207' : '#10b981');
+            const leafColorDark = treeState.golden ? '#d97706' : (treeState.wilting ? '#78350f' : '#047857');
 
-            // Bottom Foliage Circle
             ctx.beginPath();
             ctx.arc(-22, -60, 28, 0, Math.PI * 2);
             ctx.arc(22, -60, 28, 0, Math.PI * 2);
             ctx.fillStyle = leafColorDark;
             ctx.fill();
 
-            // Main Foliage Top Circle
             ctx.beginPath();
             ctx.arc(0, -85, 36, 0, Math.PI * 2);
             ctx.fillStyle = leafColor;
             ctx.fill();
 
-            // Cartoon Eyes / Face on Tree
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
             ctx.arc(-8, -82, 5, 0, Math.PI * 2);
@@ -552,7 +789,6 @@
             ctx.arc(9, -82, 2.5, 0, Math.PI * 2);
             ctx.fill();
 
-            // Smile or Sad Mouth
             ctx.beginPath();
             if (treeState.wilting) {
                 ctx.arc(0, -70, 4, Math.PI, 0, false);
@@ -563,7 +799,6 @@
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Fruit / Blossoms
             if (treeState.apples && !treeState.wilting) {
                 const fruits = [
                     {x: -18, y: -90}, {x: 18, y: -90}, {x: -25, y: -65}, {x: 25, y: -65}, {x: 0, y: -105}
@@ -576,7 +811,6 @@
                 });
             }
 
-            // Falling Leaf particle effect if wilting
             if (treeState.wilting) {
                 let leafY = (t * 20) % 50;
                 let leafX = Math.sin(t * 2) * 15;
@@ -615,7 +849,6 @@
         }
     }
 
-    // Advanced Synthesized Web Audio API Sound System
     function getAudioContext() {
         if (!audioCtx) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -637,7 +870,6 @@
         if (!soundEnabled) return;
         const ctx = getAudioContext();
         if (!ctx) return;
-
         const now = ctx.currentTime;
 
         switch (type) {
@@ -656,7 +888,6 @@
                 triggerVibration(8);
                 break;
             }
-
             case 'preset': {
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
@@ -672,9 +903,7 @@
                 triggerVibration(12);
                 break;
             }
-
             case 'treeAdd': {
-                // Organic Chime Sweep for Tree Planting
                 [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
@@ -691,9 +920,7 @@
                 triggerVibration([10, 20, 10]);
                 break;
             }
-
             case 'calculate': {
-                // Dual Oscillator Harmonic Chord Sweep
                 [440, 554.37, 659.25].forEach((freq) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
@@ -710,9 +937,7 @@
                 triggerVibration([15, 30, 15]);
                 break;
             }
-
             case 'success': {
-                // Fanfare Arpeggio
                 const chord = [523.25, 659.25, 783.99, 1046.50, 1318.51];
                 chord.forEach((freq, idx) => {
                     const osc = ctx.createOscillator();
@@ -730,9 +955,7 @@
                 triggerVibration([30, 50, 30, 50, 50]);
                 break;
             }
-
             case 'delete': {
-                // Noise Sweep / Downwards Pitch Drop
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = 'sawtooth';
@@ -747,7 +970,6 @@
                 triggerVibration([80, 40, 80]);
                 break;
             }
-
             case 'badge': {
                 const arpeggio = [440, 554.37, 659.25, 880, 1108.73, 1318.51];
                 arpeggio.forEach((freq, idx) => {
@@ -984,17 +1206,19 @@
 
     function generateDynamicTip(travel, power, dietWaste, net) {
         let tipBox = document.getElementById('ecoTip');
+        let tipContent = "";
         if (net < 0) {
-            tipBox.innerHTML = "<strong>🌟 Phenomenal!</strong> You are carbon negative today. You are actively healing the planet!";
+            tipContent = "🌟 Phenomenal! You are carbon negative today. You are actively healing the planet!";
         } else if (net === 0) {
-            tipBox.innerHTML = "<strong>🏆 Perfect Balance!</strong> You have completely neutralized your footprint. Great job!";
+            tipContent = "🏆 Perfect Balance! You have completely neutralized your footprint. Great job!";
         } else if (travel > power && travel > dietWaste) {
-            tipBox.innerHTML = "<strong>💡 Tip:</strong> Transport is your highest emission. Consider carpooling, biking, or public transit tomorrow!";
+            tipContent = "💡 Tip: Transport is your highest emission. Consider carpooling, biking, or public transit tomorrow!";
         } else if (power > travel && power > dietWaste) {
-            tipBox.innerHTML = "<strong>💡 Tip:</strong> Energy use is high today. Try turning off idle appliances or switching to LED bulbs.";
+            tipContent = "💡 Tip: Energy use is high today. Try turning off idle appliances or switching to LED bulbs.";
         } else {
-            tipBox.innerHTML = "<strong>💡 Tip:</strong> Starting to compost food waste reduces landfill methane gas down to almost zero!";
+            tipContent = "💡 Tip: Starting to compost food waste reduces landfill methane gas down to almost zero!";
         }
+        tipBox.innerHTML = `<button class="tts-btn" onclick="speakTip()" title="Read Tip Aloud">🔊</button><strong>💡 Eco Tip:</strong> ${tipContent}`;
     }
 
     function saveCalculatedEntry() {
@@ -1203,7 +1427,6 @@
         });
     }
 
-    // Local Rule-Based AI Chatbot Logic
     function toggleChatWidget() {
         playUIFeedback('click');
         document.getElementById('chatWidget').classList.toggle('active');
@@ -1230,39 +1453,28 @@
         const msgDiv = document.createElement('div');
         msgDiv.className = `chat-msg ${sender}`;
         msgDiv.innerText = text;
+
+        if (sender === 'bot') {
+            const ttsBtn = document.createElement('button');
+            ttsBtn.className = 'chat-msg-tts';
+            ttsBtn.innerHTML = '🔊';
+            ttsBtn.title = 'Read Aloud';
+            ttsBtn.onclick = function() { speakChatMessage(ttsBtn); };
+            msgDiv.appendChild(ttsBtn);
+        }
+
         container.appendChild(msgDiv);
         container.scrollTop = container.scrollHeight;
     }
 
     function getBotReply(msg) {
         const m = msg.toLowerCase();
-
-        if (m.includes('hello') || m.includes('hi') || m.includes('hey')) {
-            return "Hello! How can I help you reduce your carbon footprint today?";
-        }
-        if (m.includes('transport') || m.includes('car') || m.includes('bus') || m.includes('drive') || m.includes('travel')) {
-            return "Driving a petrol car emits ~0.21 kg CO₂e per km. Switching to public transit, EV, or biking drastically cuts down emissions!";
-        }
-        if (m.includes('diet') || m.includes('food') || m.includes('meat') || m.includes('vegan')) {
-            return "Meat-heavy diets produce ~7.2 kg CO₂e daily, while vegan diets produce only ~2.9 kg. Shifting toward plant-based meals saves up to 1.5 tons of CO₂ per year!";
-        }
-        if (m.includes('energy') || m.includes('power') || m.includes('electricity') || m.includes('solar')) {
-            return "Standard grid electricity releases ~0.85 kg CO₂e per kWh. Solar or renewable power reduces this to ~0.04 kg CO₂e per kWh.";
-        }
-        if (m.includes('tree') || m.includes('offset') || m.includes('plant')) {
-            return "A mature tree absorbs about 21.77 kg of CO₂ annually (around 0.06 kg every day). Planting trees helps compensate for unavoidable daily emissions!";
-        }
-        if (m.includes('waste') || m.includes('recycle') || m.includes('compost')) {
-            return "Landfilling organic waste creates methane (~0.80 kg CO₂e/day). Composting food waste cuts those methane emissions down to under 0.05 kg CO₂e/day.";
-        }
-        if (m.includes('target') || m.includes('goal') || m.includes('limit') || m.includes('average')) {
-            return "The current global average carbon footprint is ~12 kg CO₂e/day per person. Aiming under 5.5 kg CO₂e/day aligns with sustainable global targets!";
-        }
-        if (m.includes('tip') || m.includes('reduce') || m.includes('lower') || m.includes('help')) {
-            return "Top 3 tips:\n1. Use public transit or bike for short trips.\n2. Incorporate more plant-based meals.\n3. Compost organic waste to eliminate landfill methane.";
-        }
-
-        return "I'm a local Eco AI! You can ask me about transport emissions, diet choices, energy saving, tree offsets, waste management, or recommended daily targets.";
+        if (m.includes('hello') || m.includes('hi') || m.includes('hey')) return "Hello! How can I help you reduce your carbon footprint today?";
+        if (m.includes('transport') || m.includes('car') || m.includes('bus')) return "Driving a petrol car emits ~0.21 kg CO₂e per km. Switching to public transit or EV cuts down emissions!";
+        if (m.includes('diet') || m.includes('food') || m.includes('meat')) return "Meat-heavy diets produce ~7.2 kg CO₂e daily, while vegan diets produce only ~2.9 kg.";
+        if (m.includes('energy') || m.includes('power') || m.includes('solar')) return "Standard grid electricity releases ~0.85 kg CO₂e per kWh. Solar or renewable power reduces this to ~0.04 kg.";
+        if (m.includes('tree') || m.includes('offset')) return "A mature tree absorbs about 21.77 kg of CO₂ annually (~0.06 kg every day).";
+        return "I'm your Eco AI! You can ask me about transport emissions, diet choices, energy saving, or tree offsets.";
     }
 </script>
 
