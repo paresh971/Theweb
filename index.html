@@ -611,6 +611,18 @@
         }
     };
 
+    // Centralized Text-to-Speech Helper function
+    function speakText(text) {
+        if (!('speechSynthesis' in window)) {
+            showToast("Text-to-speech not supported.", false);
+            return;
+        }
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = currentLang === 'hi' ? 'hi-IN' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'fr' ? 'fr-FR' : 'en-US'));
+        window.speechSynthesis.speak(utterance);
+    }
+
     function changeLanguage(lang) {
         currentLang = lang;
         const t = translations[lang];
@@ -753,31 +765,43 @@
 
     function getNaturalLanguageBotReply(msg) {
         const m = msg.toLowerCase();
+        
+        // Expanded contextual logic
+        if (m.includes('my score') || m.includes('current footprint') || m.includes('how am i doing') || m.includes('progress')) {
+            let net = document.getElementById('netScore').innerText;
+            return `Your currently calculated net footprint is ${net} kg CO₂e. Keep tracking to stay green!`;
+        }
+        
         if (m.includes('who made') || m.includes('creator') || m.includes('developer') || m.includes('built this') || m.includes('owner') || m.includes('who created')) {
             return "It was made by Paresh!";
         }
         if (m.includes('hello') || m.includes('hi') || m.includes('hey') || m.includes('greetings')) {
-            return "Hello! I am your personal Eco Assistant created by Paresh. How can I help you reduce your daily carbon output today?";
+            return "Hello! I am your personal Eco Assistant created by Paresh. How can I help you track your footprint, offer transport or diet tips, or calculate your current score today?";
         }
-        if (m.includes('car') || m.includes('drive') || m.includes('petrol') || m.includes('km') || m.includes('mile') || m.includes('transport')) {
+        if (m.includes('car') || m.includes('drive') || m.includes('petrol') || m.includes('km') || m.includes('mile') || m.includes('transport') || m.includes('commute')) {
             return "Driving a standard petrol car generates about 0.21 kg of CO₂e per kilometer. Try switching to electric vehicles, public transit, or cycling to dramatically lower your commute footprint!";
         }
-        if (m.includes('diet') || m.includes('food') || m.includes('meat') || m.includes('vegan') || m.includes('eat')) {
-            return "Diet has a huge impact! Meat-heavy diets average ~7.2 kg CO₂e/day, whereas plant-based or vegan diets drop down to ~2.9 kg CO₂e/day.";
+        if (m.includes('diet') || m.includes('food') || m.includes('meat') || m.includes('vegan') || m.includes('eat') || m.includes('vegetarian')) {
+            return "Diet has a huge impact! Meat-heavy diets average ~7.2 kg CO₂e/day, whereas plant-based or vegan diets drop down to ~2.9 kg CO₂e/day. Incorporating just one meatless day helps!";
         }
         if (m.includes('energy') || m.includes('power') || m.includes('electricity') || m.includes('solar') || m.includes('kwh')) {
             return "Grid electricity contributes roughly 0.85 kg CO₂e per kWh. Transitioning to renewable solar or wind energy reduces your lifecycle emissions down to just ~0.04 kg per kWh.";
         }
         if (m.includes('tree') || m.includes('offset') || m.includes('plant')) {
-            return "A healthy mature tree absorbs approximately 21.77 kg of CO₂ per year (about 0.06 kg every single day). Planting trees helps balance out your footprint!";
+            return "A healthy mature tree absorbs approximately 21.77 kg of CO₂ per year (about 0.06 kg every single day). Planting trees directly compensates long-term residual footprints.";
         }
-        if (m.includes('waste') || m.includes('trash') || m.includes('compost') || m.includes('plastic')) {
+        if (m.includes('waste') || m.includes('trash') || m.includes('compost') || m.includes('plastic') || m.includes('recycle')) {
             return "Composting organic food waste and sorting recyclables prevents harmful methane emissions from landfills. Use our step-by-step waste tracker above to log your habits!";
         }
         if (m.includes('goal') || m.includes('target') || m.includes('limit')) {
-            return "The ideal sustainable daily carbon target is under 5.5 kg CO₂e per person to protect long-term climate stability.";
+            let goal = document.getElementById('dailyGoal').value || 12;
+            return `Your current daily limit target is set to ${goal} kg CO₂e. The ideal sustainable carbon target globally is under 5.5 kg CO₂e per person.`;
         }
-        return "That's an interesting question! Paresh designed me to help you track transport emissions, diet choices, renewable energy sources, and tree offset calculations. Feel free to ask anything else!";
+        if (m.includes('how to reduce') || m.includes('tips') || m.includes('help me') || m.includes('advice')) {
+            return "To lower your footprint: 1. Use public transit or carpool. 2. Eat more plant-based meals. 3. Turn off unused electronics. 4. Compost food waste. Which area would you like to tackle first?";
+        }
+        
+        return "That's an interesting question! Paresh designed me to help you track transport emissions, diet choices, renewable energy sources, and tree offsets. Feel free to ask about any of those, or ask for your 'current footprint'!";
     }
 
     function startVoiceInput() {
@@ -789,7 +813,7 @@
         const recognition = new SpeechRecognition();
         recognition.lang = currentLang === 'hi' ? 'hi-IN' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'fr' ? 'fr-FR' : 'en-US'));
         recognition.start();
-        showToast("Listening... Try saying 'Travel 15 kilometers' or 'Power 5'");
+        showToast("Listening... Try saying 'Travel 15 km', 'Calculate', or 'Save'");
 
         recognition.onresult = function(event) {
             const speechText = event.results[0][0].transcript.toLowerCase();
@@ -825,44 +849,59 @@
     function speakChatMessage(btnEl) {
         const msgDiv = btnEl.parentElement;
         const fullText = msgDiv.innerText.replace('🔊', '').trim();
-        if (!('speechSynthesis' in window)) {
-            showToast("Text-to-speech not supported.", false);
-            return;
-        }
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(fullText);
-        utterance.lang = currentLang === 'hi' ? 'hi-IN' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'fr' ? 'fr-FR' : 'en-US'));
-        window.speechSynthesis.speak(utterance);
+        speakText(fullText);
     }
 
     function parseVoiceCommand(text) {
+        text = text.toLowerCase();
+        
+        // Handle explicit functional commands
+        if (text.includes('calculate')) {
+            calculatePreview();
+            speakText("Calculating your daily carbon footprint preview.");
+            return;
+        } else if (text.includes('save') || text.includes('log') || text.includes('submit')) {
+            if (!document.getElementById('saveBtn').disabled) {
+                saveCalculatedEntry();
+                speakText("Success! Carbon entry saved to your dashboard.");
+            } else {
+                speakText("Please calculate your preview first before attempting to save.");
+            }
+            return;
+        } else if (text.includes('theme') || text.includes('dark mode') || text.includes('light mode')) {
+            toggleTheme();
+            speakText("Interface theme has been toggled.");
+            return;
+        }
+
         const numbers = text.match(/\d+/g);
-        if (!numbers) return;
+        if (!numbers) {
+             speakText("I didn't catch a number or specific command. Try saying 'Travel 15 kilometers', 'Calculate', or 'Save'.");
+             return;
+        }
         const val = parseFloat(numbers[0]);
 
         if (text.includes('travel') || text.includes('distance') || text.includes('kilometer') || text.includes('km') || text.includes('दूरी') || text.includes('यात्रा')) {
             document.getElementById('dist').value = val;
             document.getElementById('distLabel').innerText = val + ' km';
+            speakText(`Travel distance recorded as ${val} kilometers.`);
         } else if (text.includes('power') || text.includes('energy') || text.includes('electricity') || text.includes('ऊर्जा') || text.includes('बिजली')) {
             document.getElementById('power').value = val;
             document.getElementById('powerLabel').innerText = val + ' kWh';
+            speakText(`Energy consumption recorded as ${val} kilowatt hours.`);
         } else if (text.includes('tree') || text.includes('plant') || text.includes('पेड़')) {
             document.getElementById('trees').value = val;
             document.getElementById('treeLabel').innerText = val + ' trees';
+            speakText(`${val} planted trees added to your daily offsets.`);
+        } else {
+            speakText(`I heard the number ${val}, but I'm not sure which category it belongs to.`);
         }
         calculatePreview();
     }
 
     function speakTip() {
         const tipText = document.getElementById('ecoTip').innerText.replace('🔊', '').trim();
-        if (!('speechSynthesis' in window)) {
-            showToast("Text-to-speech not supported.", false);
-            return;
-        }
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(tipText);
-        utterance.lang = currentLang === 'hi' ? 'hi-IN' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'fr' ? 'fr-FR' : 'en-US'));
-        window.speechSynthesis.speak(utterance);
+        speakText(tipText);
     }
 
     function downloadPDF() {
@@ -1428,6 +1467,12 @@
     function generateDynamicTip(travel, power, dietWaste, net) {
         let tipBox = document.getElementById('ecoTip');
         let tipContent = "";
+
+        travel = parseFloat(travel);
+        power = parseFloat(power);
+        dietWaste = parseFloat(dietWaste);
+        net = parseFloat(net);
+
         if (net < 0) {
             tipContent = "🌟 Phenomenal! You are carbon negative today. You are actively healing the planet!";
         } else if (net === 0) {
@@ -1436,8 +1481,10 @@
             tipContent = "💡 Tip: Transport is your highest emission. Consider carpooling, biking, or public transit tomorrow!";
         } else if (power > travel && power > dietWaste) {
             tipContent = "💡 Tip: Energy use is high today. Try turning off idle appliances or switching to LED bulbs.";
+        } else if (dietWaste > travel && dietWaste > power) {
+            tipContent = "💡 Tip: Diet and waste make up the bulk of your footprint today. Consider a plant-based meal or composting!";
         } else {
-            tipContent = "💡 Tip: Completing composting and recycling steps significantly reduces landfill methane gas!";
+            tipContent = "💡 Tip: Your emissions are evenly spread. Small reductions in travel, power, or waste all add up to a big impact!";
         }
         tipBox.innerHTML = `<button class="tts-btn" onclick="speakTip()" title="Read Tip Aloud">🔊</button><strong>💡 Eco Tip:</strong> ${tipContent}`;
     }
