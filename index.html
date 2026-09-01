@@ -48,33 +48,23 @@
         
         .container { width: 100%; max-width: 1280px; margin: 0 auto; }
         
-        /* App Splash Screen / Starting Animation */
-        #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.6s ease, visibility 0.6s ease; }
+        /* 1. YouTube-Style Minimalist Splash Screen */
+        #splashScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease, visibility 0.5s ease; }
         #splashScreen.fade-out { opacity: 0; visibility: hidden; }
-        .splash-logo-box { width: 90px; height: 90px; background: var(--primary-light); color: var(--primary); border-radius: 26px; display: flex; align-items: center; justify-content: center; font-size: 48px; animation: floatEffect 2s infinite ease-in-out, pulseGlow 2s infinite; margin-bottom: 20px; }
-        .splash-title { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
-        .splash-subtitle { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; margin-bottom: 30px; }
-        .splash-progress-track { width: 200px; height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; }
-        .splash-progress-fill { height: 100%; width: 0%; background: var(--primary); border-radius: 10px; animation: loadProgress 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .splash-logo-box { width: 110px; height: 110px; background: var(--primary-light); color: var(--primary); border-radius: 30px; display: flex; align-items: center; justify-content: center; font-size: 58px; animation: floatEffect 2s infinite ease-in-out, pulseGlow 2s infinite; }
         
-        @keyframes loadProgress {
-            0% { width: 0%; }
-            50% { width: 75%; }
-            100% { width: 100%; }
-        }
-
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(24px); }
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes pulseGlow {
             0% { box-shadow: 0 0 0 0 var(--primary-light); }
-            70% { box-shadow: 0 0 0 16px rgba(16, 185, 129, 0); }
+            70% { box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); }
             100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
         @keyframes floatEffect {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
+            50% { transform: translateY(-8px); }
         }
         @keyframes popIn {
             0% { opacity: 0; transform: scale(0.92); }
@@ -136,8 +126,12 @@
         .quick-presets { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
         .chip { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .chip:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+        .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .timeframe-selector { display: flex; gap: 6px; }
+        .timeframe-btn { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .timeframe-btn:hover, .timeframe-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
         
-        /* Interactive Step-by-Step Waste Management */
         .waste-steps-container { display: flex; flex-direction: column; gap: 10px; background: var(--bg); padding: 12px; border-radius: 10px; border: 1px solid var(--border); }
         .waste-step-item { display: flex; align-items: center; justify-content: space-between; background: var(--surface); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s ease; }
         .waste-step-item:hover { border-color: var(--primary); }
@@ -189,8 +183,9 @@
         .btn-delete { background: rgba(239, 68, 68, 0.1); border: none; color: var(--danger); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: all 0.2s; }
         .btn-delete:hover { background: var(--danger); color: white; transform: scale(1.05); }
         
-        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 12px 20px; border-radius: 10px; box-shadow: var(--shadow); font-size: 0.85rem; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 1000; border-left: 4px solid var(--primary); }
+        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 12px 20px; border-radius: 10px; box-shadow: var(--shadow); font-size: 0.85rem; font-weight: 600; transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 1000; border-left: 4px solid var(--primary); display: flex; align-items: center; gap: 10px; }
         .toast.show { transform: translateY(0); opacity: 1; }
+        .toast-action { background: var(--primary-light); color: var(--primary-hover); border: 1px solid var(--primary); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: bold; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 2000; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
@@ -210,7 +205,6 @@
         .knowledge-card h4 { font-size: 0.95rem; color: var(--text); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .knowledge-card p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
 
-        /* Draggable & Floatable AI Chatbot Widget Styles */
         .chat-toggle-btn { position: fixed; bottom: 24px; left: 24px; width: 56px; height: 56px; border-radius: 50%; background: var(--primary); color: white; border: none; font-size: 1.5rem; cursor: grab; box-shadow: 0 4px 14px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; z-index: 2900; transition: background-color 0.25s ease, transform 0.2s ease; user-select: none; touch-action: none; }
         .chat-toggle-btn:active { cursor: grabbing; }
         .chat-toggle-btn:hover { transform: scale(1.08); background: var(--primary-hover); }
@@ -236,14 +230,9 @@
 </head>
 <body>
 
-<!-- App Splash Screen (Starting Animation) -->
+<!-- 1. YouTube-Style Minimalist Splash Screen -->
 <div id="splashScreen">
     <div class="splash-logo-box">🌱</div>
-    <div class="splash-title">EcoTrack Pro</div>
-    <div class="splash-subtitle">Green Technology Carbon Project Dashboard</div>
-    <div class="splash-progress-track">
-        <div class="splash-progress-fill"></div>
-    </div>
 </div>
 
 <div class="container">
@@ -260,10 +249,15 @@
                 <option value="en">English</option>
                 <option value="hi">हिंदी (Hindi)</option>
                 <option value="sa">संस्कृतम् (Sanskrit)</option>
+                <option value="ta">தமிழ் (Tamil)</option>
+                <option value="te">తెలుగు (Telugu)</option>
+                <option value="mr">मराठी (Marathi)</option>
+                <option value="bn">বাংলা (Bengali)</option>
+                <option value="gu">ગુજરાતી (Gujarati)</option>
                 <option value="es">Español</option>
                 <option value="fr">Français</option>
             </select>
-            <button class="btn-voice" id="voiceBtn" onclick="startVoiceInput()" title="Voice Input">🎙️ Speak</button>
+            <button class="btn-voice" id="voiceBtn" onclick="startVoiceInput()" title="Voice Control">🎙️ Speak Command</button>
             <button class="btn-sound" id="soundToggleBtn" onclick="toggleSound()">🔊 Sound: ON</button>
             <button class="btn-knowledge" onclick="openKnowledgeModal()" id="knowledgeBtn">📚 Knowledge</button>
             <button class="btn-theme" id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
@@ -338,20 +332,19 @@
                     </select>
                 </div>
 
-                <!-- Interactive Step-by-Step Waste Management Feature -->
                 <div class="form-group">
                     <div class="form-label" id="wasteTitleText">♻️ Waste Management Practice (Step-by-Step)</div>
                     <div class="waste-steps-container">
                         <label class="waste-step-item" id="step1Item">
-                            <span class="waste-step-label">🍎 1. Composted Organic / Food Waste</span>
+                            <span class="waste-step-label" id="wasteStep1Text">🍎 1. Composted Organic / Food Waste</span>
                             <input type="checkbox" class="waste-checkbox" id="wasteStep1" onchange="updateWasteSteps(); playUIFeedback('click');">
                         </label>
                         <label class="waste-step-item" id="step2Item">
-                            <span class="waste-step-label">♻️ 2. Separated Recyclables (Plastics/Glass/Paper)</span>
+                            <span class="waste-step-label" id="wasteStep2Text">♻️ 2. Separated Recyclables (Plastics/Glass/Paper)</span>
                             <input type="checkbox" class="waste-checkbox" id="wasteStep2" onchange="updateWasteSteps(); playUIFeedback('click');">
                         </label>
                         <label class="waste-step-item" id="step3Item">
-                            <span class="waste-step-label">🗑️ 3. Avoided Single-Use Plastics / Landfill Trash</span>
+                            <span class="waste-step-label" id="wasteStep3Text">🗑️ 3. Avoided Single-Use Plastics / Landfill Trash</span>
                             <input type="checkbox" class="waste-checkbox" id="wasteStep3" onchange="updateWasteSteps(); playUIFeedback('click');">
                         </label>
                     </div>
@@ -432,7 +425,16 @@
             </div>
 
             <div class="card" style="flex-grow: 1;">
-                <div class="card-header"><span class="card-title" id="trendTitle">7-Day Carbon Trend</span></div>
+                <!-- FEATURE 3: Customizable Timeframes in Carbon Trend Chart -->
+                <div class="card-header">
+                    <span class="card-title" id="trendTitle">Carbon Trend</span>
+                    <div class="timeframe-selector">
+                        <button class="timeframe-btn active" onclick="setTimeFrame('7d', this)">7 Days</button>
+                        <button class="timeframe-btn" onclick="setTimeFrame('30d', this)">30 Days</button>
+                        <button class="timeframe-btn" onclick="setTimeFrame('1y', this)">1 Year</button>
+                        <button class="timeframe-btn" onclick="setTimeFrame('all', this)">All</button>
+                    </div>
+                </div>
                 <div class="chart-container">
                     <canvas id="trendChart"></canvas>
                 </div>
@@ -444,6 +446,9 @@
         <div class="card-header">
             <span class="card-title" id="activityTitle">Activity Log</span>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <!-- FEATURE 4: Undo & Redo Actions -->
+                <button class="chip" id="undoBtn" onclick="undoLastAction()" disabled style="color: var(--info);">↩️ Undo</button>
+                <button class="chip" id="redoBtn" onclick="redoLastAction()" disabled style="color: var(--info);">↪️ Redo</button>
                 <input type="text" id="searchInput" placeholder="🔍 Search Date..." onkeyup="renderHistory()" style="padding: 6px 12px; font-size: 0.8rem; width: 140px;">
                 <button class="chip" onclick="downloadPDF()" style="color: var(--warning);" id="pdfBtnText">📥 Download PDF</button>
                 <button class="chip" onclick="exportCSV()" style="color: var(--info);">📊 Export CSV</button>
@@ -472,12 +477,12 @@
     </div>
 </div>
 
-<div class="toast" id="toastBox">Log saved successfully!</div>
+<div class="toast" id="toastBox"><span id="toastText">Log saved successfully!</span></div>
 
 <div class="modal-overlay" id="confirmModal">
     <div class="modal-card">
         <div class="modal-title">Clear All History?</div>
-        <div class="modal-text">Are you sure you want to permanently delete all your logged carbon data? This action cannot be undone.</div>
+        <div class="modal-text">Are you sure you want to permanently delete all your logged carbon data? This action can be undone via the Undo button.</div>
         <div class="modal-buttons">
             <button class="btn-modal-cancel" onclick="closeModal('confirmModal')">Cancel</button>
             <button class="btn-modal-confirm" onclick="executeClearHistory()">Yes, Delete All</button>
@@ -522,7 +527,6 @@
     </div>
 </div>
 
-<!-- Draggable AI Chatbot Widget -->
 <button class="chat-toggle-btn" id="chatToggleBtn" title="Eco AI Assistant">🤖</button>
 <div class="chat-widget" id="chatWidget">
     <div class="chat-header">
@@ -534,7 +538,7 @@
     </div>
     <div class="chat-messages" id="chatMessages">
         <div class="chat-msg bot">
-            Hello! I am your Eco AI assistant. Ask me anything in natural language about carbon reduction, transport, diet, or tips to lower your footprint!
+            Hello! I am your self-learning Eco AI assistant. Ask me anything about carbon reduction, app voice commands, active trends, anomalies, or historical forecasts!
             <button class="chat-msg-tts" onclick="speakChatMessage(this)" title="Read Aloud">🔊</button>
         </div>
     </div>
@@ -552,66 +556,248 @@
     let soundEnabled = true;
     let audioCtx = null;
     let currentLang = 'en';
+    let currentTrendRange = '7d';
 
+    // FEATURE 4: Undo & Redo History State Management
+    let historyUndoStack = [];
+    let historyRedoStack = [];
+
+    function pushHistoryState() {
+        historyUndoStack.push(JSON.stringify(historyData));
+        if (historyUndoStack.length > 30) historyUndoStack.shift(); // keep max 30 states
+        historyRedoStack = []; // clear redo stack on new action
+        updateUndoRedoButtons();
+    }
+
+    function updateUndoRedoButtons() {
+        const uBtn = document.getElementById('undoBtn');
+        const rBtn = document.getElementById('redoBtn');
+        if (uBtn) uBtn.disabled = historyUndoStack.length === 0;
+        if (rBtn) rBtn.disabled = historyRedoStack.length === 0;
+    }
+
+    function undoLastAction() {
+        if (historyUndoStack.length === 0) return;
+        playUIFeedback('click');
+        historyRedoStack.push(JSON.stringify(historyData));
+        const previousState = historyUndoStack.pop();
+        historyData = JSON.parse(previousState);
+        localStorage.setItem('ecoTrackHistory', JSON.stringify(historyData));
+        renderHistory();
+        renderChart();
+        updateGamification(false);
+        updateUndoRedoButtons();
+        showToast("Action undone successfully!");
+    }
+
+    function redoLastAction() {
+        if (historyRedoStack.length === 0) return;
+        playUIFeedback('click');
+        historyUndoStack.push(JSON.stringify(historyData));
+        const nextState = historyRedoStack.pop();
+        historyData = JSON.parse(nextState);
+        localStorage.setItem('ecoTrackHistory', JSON.stringify(historyData));
+        renderHistory();
+        renderChart();
+        updateGamification(false);
+        updateUndoRedoButtons();
+        showToast("Action redone successfully!");
+    }
+
+    // FEATURE 1: Expanded Self-Learning AI Capabilities
+    let aiMemory = JSON.parse(localStorage.getItem('ecoAIMemory')) || {
+        interactionsCount: 0,
+        frequentQuestions: {},
+        preferredMode: 'balanced',
+        learnedInsights: []
+    };
+
+    function saveAIMemory() {
+        localStorage.setItem('ecoAIMemory', JSON.stringify(aiMemory));
+    }
+
+    function learnUserPatterns() {
+        if (historyData.length < 3) return;
+        let totalTravel = 0, totalPower = 0, totalDiet = 0;
+        historyData.forEach(d => {
+            totalTravel += parseFloat(d.travel || 0);
+            totalPower += parseFloat(d.power || 0);
+            totalDiet += parseFloat(d.dietWaste || 0);
+        });
+        if (totalTravel > totalPower && totalTravel > totalDiet) {
+            aiMemory.preferredMode = 'travel_heavy';
+        } else if (totalPower > totalTravel && totalPower > totalDiet) {
+            aiMemory.preferredMode = 'power_heavy';
+        } else if (totalDiet > totalTravel && totalDiet > totalPower) {
+            aiMemory.preferredMode = 'diet_heavy';
+        }
+        saveAIMemory();
+    }
+
+    // STEP 2: Expand Capabilities of Language with Complete Indian Languages Text Map
     const translations = {
         en: {
             title: "EcoTrack Pro", slogan: "Track, reduce, and offset your daily carbon footprint.",
             logTitle: "Log Daily Metrics", dateText: "📅 Entry Date", distText: "🚗 Travel Distance",
             transportText: "Mode of Transport", energyText: "⚡ Energy Consumption", energySourceText: "Energy Source",
-            dietText: "🍔 Diet Choice", wasteTitle: "♻️ Waste Management Practice (Step-by-Step)", treeText: "🌳 Trees Planted (Offsets)",
-            calcBtn: "🧮 Calculate", saveBtn: "💾 Save Entry", companionTitle: "Eco Companion Tree",
+            dietText: "🍔 Diet Choice", wasteTitle: "♻️ Waste Management Practice (Step-by-Step)",
+            step1Text: "🍎 1. Composted Organic / Food Waste", step2Text: "♻️ 2. Separated Recyclables (Plastics/Glass/Paper)", step3Text: "🗑️ 3. Avoided Single-Use Plastics / Landfill Trash",
+            treeText: "🌳 Trees Planted (Offsets)", calcBtn: "🧮 Calculate", saveBtn: "💾 Save Entry", companionTitle: "Eco Companion Tree",
             liveStatusText: "Live Tree Status", analyticsTitle: "Daily Analytics", goalLabel: "🎯 Goal:",
             mTrans: "🚗 Transport Emissions", mEner: "⚡ Energy Emissions", mWaste: "🗑️ Waste & Diet", mOffset: "🌳 Tree Offsets Applied",
-            trendTitle: "7-Day Carbon Trend", activityTitle: "Activity Log", pdfBtn: "📥 Download PDF",
-            thDate: "Date", thTrans: "Transport", thEner: "Energy", thDiet: "Diet & Waste", thOffset: "Offsets", thNet: "Net Total", thAction: "Action"
+            trendTitle: "Carbon Trend", activityTitle: "Activity Log", pdfBtn: "📥 Download PDF",
+            thDate: "Date", thTrans: "Transport", thEner: "Energy", thDiet: "Diet & Waste", thOffset: "Offsets", thNet: "Net Total", thAction: "Action",
+            tr1: "Petrol Car (~0.21 kg/km)", tr2: "Electric Vehicle (~0.05 kg/km)", tr3: "Public Bus / Metro (~0.08 kg/km)", tr4: "Walk / Bicycle (0.00 kg/km)",
+            en1: "Grid Electricity (~0.85 kg/kWh)", en2: "Solar / Renewable (~0.04 kg/kWh lifecycle)",
+            dt1: "Meat Heavy (~7.2 kg/day)", dt2: "Balanced Mixed (~4.5 kg/day)", dt3: "Vegan (~2.9 kg/day)"
         },
         hi: {
             title: "इकोट्रैक प्रो", slogan: "अपने दैनिक कार्बन पदचिह्न को ट्रैक, कम और ऑफसेट करें।",
             logTitle: "दैनिक मीट्रिक लॉग करें", dateText: "📅 प्रविष्टि तिथि", distText: "🚗 यात्रा दूरी",
             transportText: "परिवहन का साधन", energyText: "⚡ ऊर्जा की खपत", energySourceText: "ऊर्जा स्रोत",
-            dietText: "🍔 आहार विकल्प", wasteTitle: "♻️ अपशिष्ट प्रबंधन अभ्यास (चरण-दर-चरण)", treeText: "🌳 पेड़ लगाए गए (ऑफसेट)",
-            calcBtn: "🧮 गणना करें", saveBtn: "💾 सहेजें", companionTitle: "इको साथी वृक्ष",
+            dietText: "🍔 आहार विकल्प", wasteTitle: "♻️ अपशिष्ट प्रबंधन अभ्यास (चरण-दर-चरण)",
+            step1Text: "🍎 1. जैविक/खाद्य अपशिष्ट से खाद बनाई", step2Text: "♻️ 2. पुनर्चक्रण योग्य सामग्री (प्लास्टिक/कांच/कागज) अलग की", step3Text: "🗑️ 3. एकल-उपयोग प्लास्टिक से परहेज किया",
+            treeText: "🌳 पेड़ लगाए गए (ऑफसेट)", calcBtn: "🧮 गणना करें", saveBtn: "💾 सहेजें", companionTitle: "इको साथी वृक्ष",
             liveStatusText: "लाइव ट्री स्थिति", analyticsTitle: "दैनिक विश्लेषण", goalLabel: "🎯 लक्ष्य:",
             mTrans: "🚗 परिवहन उत्सर्जन", mEner: "⚡ ऊर्जा उत्सर्जन", mWaste: "🗑️ अपशिष्ट और आहार", mOffset: "🌳 पेड़ ऑफसेट लागू",
-            trendTitle: "7-दिवसीय कार्बन रुझान", activityTitle: "गतिविधि लॉग", pdfBtn: "📥 पीडीएफ डाउनलोड",
-            thDate: "तिथि", thTrans: "परिवहन", thEner: "ऊर्जा", thDiet: "आहार और अपशिष्ट", thOffset: "ऑफसेट", thNet: "शुद्ध कुल", thAction: "कार्रवाई"
+            trendTitle: "कार्बन रुझान", activityTitle: "गतिविधि लॉग", pdfBtn: "📥 पीडीएफ डाउनलोड",
+            thDate: "तिथि", thTrans: "परिवहन", thEner: "ऊर्जा", thDiet: "आहार और अपशिष्ट", thOffset: "ऑफसेट", thNet: "शुद्ध कुल", thAction: "कार्रवाई",
+            tr1: "पेट्रोल कार (~0.21 किमी/किग्रा)", tr2: "इलेक्ट्रिक वाहन (~0.05 किमी/किग्रा)", tr3: "सार्वजनिक बस / मेट्रो (~0.08 किमी/किग्रा)", tr4: "पैदल / साइकिल (0.00 किमी/किग्रा)",
+            en1: "ग्रिड बिजली (~0.85 किग्रा/किलोवाट घंटा)", en2: "सौर / नवीकरणीय (~0.04 किग्रा/किलोवाट घंटा)",
+            dt1: "मांसाहार प्रधान (~7.2 किग्रा/दिन)", dt2: "संतुलित मिश्रित (~4.5 किग्रा/दिन)", dt3: "शाकाहारी / वीगन (~2.9 किग्रा/दिन)"
         },
         sa: {
-            title: "इकोट्रैक प्रो", slogan: "दैनिकस्य कार्बनपदचिह्नं अन्वेषयतु, न्यूनीकुरुतु च。",
+            title: "इकोट्रैक प्रो", slogan: "दैनिकस्य कार्बनपदचिह्नं अन्वेषयतु, न्यूनीकुरुतु च।",
             logTitle: "दैनिकमापकानां प्रविष्टिः", dateText: "📅 दिनाङ्कः", distText: "🚗 यात्रादूरम्",
             transportText: "वाहनप्रकारः", energyText: "⚡ ऊर्जाउपयोगः", energySourceText: "ऊर्जास्रोतस्",
-            dietText: "🍔 आहारविकल्पः", wasteTitle: "♻️ कचराप्रबन्धनम् (क्रमशः)", treeText: "🌳 वृक्षाः रोपिताः",
-            calcBtn: "🧮 गणयतु", saveBtn: "💾 रक्षतु", companionTitle: "इको मित्र वृक्षः",
+            dietText: "🍔 आहारविकल्पः", wasteTitle: "♻️ कचराप्रबन्धनम् (क्रमशः)",
+            step1Text: "🍎 १. जैविक कचरा खादितः", step2Text: "♻️ २. पुनर्चक्रण वस्तु पृथकृतम्", step3Text: "🗑️ ३. प्लास्टिक उपयोगः निवारितः",
+            treeText: "🌳 वृक्षाः रोपिताः", calcBtn: "🧮 गणयतु", saveBtn: "💾 रक्षतु", companionTitle: "इको मित्र वृक्षः",
             liveStatusText: "जीवितवृक्षस्थितिः", analyticsTitle: "दैनिकविश्लेषणम्", goalLabel: "🎯 लक्ष्यम्:",
             mTrans: "🚗 वाहनोत्सर्जनम्", mEner: "⚡ ऊर्जाउत्सर्जनम्", mWaste: "🗑️ कचरा आहारश्च", mOffset: "🌳 वृक्षक्षतिपूर्तिः",
-            trendTitle: "सप्ताहस्य कार्बनप्रवृत्तिः", activityTitle: "कार्यसूची", pdfBtn: "📥 पीडीएफ डाउनलोड्",
-            thDate: "दिनाङ्कः", thTrans: "वाहनम्", thEner: "ऊर्जा", thDiet: "आहार-कचरा", thOffset: "क्षतिपूर्तिः", thNet: "कुलम्", thAction: "क्रिया"
+            trendTitle: "कार्बनप्रवृत्तिः", activityTitle: "कार्यसूची", pdfBtn: "📥 पीडीएफ डाउनलोड्",
+            thDate: "दिनाङ्कः", thTrans: "वाहनम्", thEner: "ऊर्जा", thDiet: "आहार-कचरा", thOffset: "क्षतिपूर्तिः", thNet: "कुलम्", thAction: "क्रिया",
+            tr1: "पेट्रोल वाहनम् (~0.21 kg/km)", tr2: "विद्युत वाहनम् (~0.05 kg/km)", tr3: "सार्वजनिक यानम् (~0.08 kg/km)", tr4: "पादचारः / द्विचक्रिका (0.00 kg/km)",
+            en1: "ग्रिड विद्युत (~0.85 kg/kWh)", en2: "सौर ऊर्जा (~0.04 kg/kWh)",
+            dt1: "मां साहाराधिकम् (~7.2 kg/day)", dt2: "संतुलितम् (~4.5 kg/day)", dt3: "शुद्ध शाकाहारः (~2.9 kg/day)"
+        },
+        ta: {
+            title: "ஈகோட்ராக் புரோ", slogan: "உங்கள் அன்றாட கார்பன் தடம் கண்காணிக்கவும் மற்றும் குறைக்கவும்.",
+            logTitle: "தினசரி பதிவுகள்", dateText: "📅 தேதி", distText: "🚗 பயண தூரம்",
+            transportText: "போக்குவரத்து முறை", energyText: "⚡ மின் நுகர்வு", energySourceText: "மின் ஆதாரம்",
+            dietText: "🍔 உணவு முறை", wasteTitle: "♻️ கழிவு மேலாண்மை",
+            step1Text: "🍎 1. மட்கும் கழிவு உரம் ஆக்கப்பட்டது", step2Text: "♻️ 2. மறுசுழற்சி பொருட்கள் பிரிக்கப்பட்டன", step3Text: "🗑️ 3. நெகிழி பயன்பாடு தவிர்க்கப்பட்டது",
+            treeText: "🌳 நட்ட மரங்கள்", calcBtn: "🧮 கணக்கிடு", saveBtn: "💾 சேமிக்கவும்", companionTitle: "சுற்றுச்சூழல் மரம்",
+            liveStatusText: "மரத்தின் நிலை", analyticsTitle: "தினசரி பகுப்பாய்வு", goalLabel: "🎯 இலக்கு:",
+            mTrans: "🚗 போக்குவரத்து உமிழ்வு", mEner: "⚡ மின்சார உமிழ்வு", mWaste: "🗑️ கழிவு & உணவு", mOffset: "🌳 மரங்களின் ஈடுசெய்",
+            trendTitle: "கார்பன் போக்கு", activityTitle: "செயல்பாட்டு பதிவு", pdfBtn: "📥 PDF பதிவிறக்கு",
+            thDate: "தேதி", thTrans: "பயணம்", thEner: "மின்சாரம்", thDiet: "உணவு & கழிவு", thOffset: "ஈடுசெய்", thNet: "மொத்தம்", thAction: "செயல்பாடு",
+            tr1: "பெட்ரோல் கார் (~0.21 kg/km)", tr2: "மின்சார வாகனம் (~0.05 kg/km)", tr3: "பேருந்து / மெட்ரோ (~0.08 kg/km)", tr4: "நடை / மிதிவண்டி (0.00 kg/km)",
+            en1: "மின்சார கட்டமைப்பு (~0.85 kg/kWh)", en2: "சூரிய மின்சாரம் (~0.04 kg/kWh)",
+            dt1: "அசைவ உணவு (~7.2 kg/day)", dt2: "சீரான உணவு (~4.5 kg/day)", dt3: "சைவ உணவு (~2.9 kg/day)"
+        },
+        te: {
+            title: "ఈకోట్రాక్ ప్రో", slogan: "మీ రోజువారీ కార్బన్ పాదముద్రను ట్రాక్ చేయండి మరియు తగ్గించండి.",
+            logTitle: "రోజువారీ కొలతలు న నమోదు చేయండి", dateText: "📅 తేదీ", distText: "🚗 ప్రయాణ దూరం",
+            transportText: "రవాణా మార్గం", energyText: "⚡ విద్యుత్ వాడకం", energySourceText: "విద్యుత్ మూలం",
+            dietText: "🍔 ఆహార ఎంపిక", wasteTitle: "♻️ వ్యర్థాల నిర్వహణ",
+            step1Text: "🍎 1. సేంద్రీయ వ్యర్థాల కంపోస్టింగ్", step2Text: "♻️ 2. పునర్వినియోగ వ్యర్థాల వేరుచేత", step3Text: "🗑️ 3. ప్లాస్టిక్ వాడకం నివారించడం",
+            treeText: "🌳 నాటిన మొక్కలు", calcBtn: "🧮 లెక్కించండి", saveBtn: "💾 సేవ్ చేయండి", companionTitle: "పర్యావరణ వృక్షం",
+            liveStatusText: "చెట్టు ప్రగతి", analyticsTitle: "రోజువారీ విశ్లేషణ", goalLabel: "🎯 లక్ష్యం:",
+            mTrans: "🚗 రవాణా ఉద్గారాలు", mEner: "⚡ విద్యుత్ ఉద్గారాలు", mWaste: "🗑️ వ్యర్థాలు & ఆహారం", mOffset: "🌳 ఉద్గార తగ్గింపు",
+            trendTitle: "కార్బన్ ధోరణి", activityTitle: "కార్యకలాపాల లాగ్", pdfBtn: "📥 PDF డౌన్‌లోడ్",
+            thDate: "తేదీ", thTrans: "రవాణా", thEner: "విద్యుత్", thDiet: "ఆహారం వ్యర్థాలు", thOffset: "తగ్గింపు", thNet: "మొత్తం", thAction: "చర్య",
+            tr1: "పెట్రోల్ కారు (~0.21 kg/km)", tr2: "ఎలక్ట్రిక్ వాహనం (~0.05 kg/km)", tr3: "బస్సు / మెట్రో (~0.08 kg/km)", tr4: "కాళ్ళ నడక / సైకిల్ (0.00 kg/km)",
+            en1: "గ్రిడ్ విద్యుత్ (~0.85 kg/kWh)", en2: "సౌర విద్యుత్ (~0.04 kg/kWh)",
+            dt1: "మాంసాహారం (~7.2 kg/day)", dt2: "సమతుల్య ఆహారం (~4.5 kg/day)", dt3: "శాకాహారం (~2.9 kg/day)"
+        },
+        mr: {
+            title: "इकोट्रॅक प्रो", slogan: "तुमचे दैनंदिन कार्बन फूटप्रिंट ट्रॅक करा, कमी करा आणि ऑफसेट करा.",
+            logTitle: "दैनंदिन माहिती नोंदवा", dateText: "📅 तारीख", distText: "🚗 प्रवासाचे अंतर",
+            transportText: "प्रवासाचे साधन", energyText: "⚡ वीज वापर", energySourceText: "ऊर्जा स्त्रोत",
+            dietText: "🍔 आहार पर्याय", wasteTitle: "♻️ कचरा व्यवस्थापन",
+            step1Text: "🍎 १. सेंद्रिय कचऱ्याचे खत बनवले", step2Text: "♻️ २. पुनर्वापरयोग्य कचरा वेगळा केला", step3Text: "🗑️ ३. प्लास्टिकचा वापर टाळला",
+            treeText: "🌳 लावलेली झाडे", calcBtn: "🧮 गणना करा", saveBtn: "💾 जतन करा", companionTitle: "इको सोबती वृक्ष",
+            liveStatusText: "झाडाची स्थिती", analyticsTitle: "दैनंदिन विश्लेषण", goalLabel: "🎯 ध्येय:",
+            mTrans: "🚗 प्रवास उत्सर्जन", mEner: "⚡ वीज उत्सर्जन", mWaste: "🗑️ कचरा आणि आहार", mOffset: "🌳 झाडांचे ऑफसेट",
+            trendTitle: "कार्बन कल", activityTitle: "कृती नोंदणी", pdfBtn: "📥 PDF डाउनलोड",
+            thDate: "तारीख", thTrans: "प्रवास", thEner: "वीज", thDiet: "आहार-कचरा", thOffset: "ऑफसेट", thNet: "एकूण", thAction: "कृती",
+            tr1: "पेट्रोल कार (~0.21 kg/km)", tr2: "इलेक्ट्रिक वाहन (~0.05 kg/km)", tr3: "बस / मेट्रो (~0.08 kg/km)", tr4: "पायी / सायकलीवर (0.00 kg/km)",
+            en1: "ग्रिड वीज (~0.85 kg/kWh)", en2: "सौर ऊर्जा (~0.04 kg/kWh)",
+            dt1: "मांसाहारी आहार (~7.2 kg/day)", dt2: "संतुलित आहार (~4.5 kg/day)", dt3: "शाकाहारी (~2.9 kg/day)"
+        },
+        bn: {
+            title: "ইকোট্র্যাক প্রো", slogan: "আপনার দৈনিক কার্বন ফুটপ্রিন্ট ট্র্যাক, হ্রাস এবং অফসেট করুন।",
+            logTitle: "দৈনিক তথ্য লিখুন", dateText: "📅 তারিখ", distText: "🚗 ভ্রমণের দূরত্ব",
+            transportText: "পরিবহন মাধ্যম", energyText: "⚡ বিদ্যুৎ খরচ", energySourceText: "বিদ্যুৎ উৎস",
+            dietText: "🍔 খাদ্যাভ্যাস", wasteTitle: "♻️ বর্জ্য ব্যবস্থাপনা",
+            step1Text: "🍎 ১. জৈব বর্জ্য সুরভিত করা হয়েছে", step2Text: "♻️ ২. পুনর্ব্যবহারযোগ্য বর্জ্য পৃথক করা হয়েছে", step3Text: "🗑️ ৩. প্লাস্টিক ব্যবহার পরিহার করা হয়েছে",
+            treeText: "🌳 রোপণ করা গাছ", calcBtn: "🧮 গণনা করুন", saveBtn: "💾 সংরক্ষণ করুন", companionTitle: "ইকো সাথী গাছ",
+            liveStatusText: "গাছের অবস্থা", analyticsTitle: "দৈনিক বিশ্লেষণ", goalLabel: "🎯 লক্ষ্য:",
+            mTrans: "🚗 পরিবহন নির্গমন", mEner: "⚡ বিদ্যুৎ নির্গমন", mWaste: "🗑️ বর্জ্য ও খাদ্য", mOffset: "🌳 গাছের অফসেট",
+            trendTitle: "কার্বন প্রবণতা", activityTitle: "কার্যক্রম লগ", pdfBtn: "📥 PDF ডাউনলোড",
+            thDate: "তারিখ", thTrans: "পরিবহন", thEner: "বিদ্যুৎ", thDiet: "খাদ্য ও বর্জ্য", thOffset: "অফসেট", thNet: "মোট", thAction: "পদক্ষেপ",
+            tr1: "পেট্রোল কার (~0.21 kg/km)", tr2: "ইলেকট্রিক গাড়ি (~0.05 kg/km)", tr3: "বাস / মেট্রো (~0.08 kg/km)", tr4: "হাঁটা / সাইকেল (0.00 kg/km)",
+            en1: "গ্রিড বিদ্যুৎ (~0.85 kg/kWh)", en2: "সৌর বিদ্যুৎ (~0.04 kg/kWh)",
+            dt1: "আমিষ খাবার (~7.2 kg/day)", dt2: "সুষম খাবার (~4.5 kg/day)", dt3: "শাাকাহারি (~2.9 kg/day)"
+        },
+        gu: {
+            title: "ઈકોટ્રેક પ્રો", slogan: "તમારા દૈનિક કાર્બન ફૂટપ્રિન્ટને ટ્રેક કરો, ઘટાડો અને ઓફસેટ કરો.",
+            logTitle: "દૈનિક માહિતી ઉમેરો", dateText: "📅 તારીખ", distText: "🚗 પ્રવાસ અંતર",
+            transportText: "વાહન વ્યવહાર", energyText: "⚡ વીજ વપરાશ", energySourceText: "ઊર્જા સ્રોત",
+            dietText: "🍔 ખોરાકની પસંદગી", wasteTitle: "♻️ કચરા વ્યવસ્થાપન",
+            step1Text: "🍎 ૧. જૈવિક કચરાનું ખાતર બનાવ્યું", step2Text: "♻️ ૨. રિસાયકલ કચરો અલગ કર્યો", step3Text: "🗑️ ૩. પ્લાસ્ટિકનો વપરાશ ટાળ્યો",
+            treeText: "🌳 વાવેલા વૃક્ષો", calcBtn: "🧮 ગણતરી કરો", saveBtn: "💾 સાચવો", companionTitle: "ઈકો વૃક્ષ મિત્ર",
+            liveStatusText: "વૃક્ષ સ્થિતિ", analyticsTitle: "દૈનિક વિશ્લેષણ", goalLabel: "🎯 લક્ષ્ય:",
+            mTrans: "🚗 પ્રવાસ ઉત્સર્જન", mEner: "⚡ વીજ ઉત્સર્જન", mWaste: "🗑️ કચરો અને ખોરાક", mOffset: "🌳 વૃક્ષ ઓફસેટ",
+            trendTitle: "કાર્બન ટ્રેન્ડ", activityTitle: "પ્રવૃત્તિ નોંધ", pdfBtn: "📥 PDF ડાઉનલોડ",
+            thDate: "તારીખ", thTrans: "પ્રવાસ", thEner: "વીજળી", thDiet: "ખોરાક-કચરો", thOffset: "ઓફસેટ", thNet: "કુલ", thAction: "ક્રિયા",
+            tr1: "પેટ્રોલ કાર (~0.21 kg/km)", tr2: "ઇલેક્ટ્રિક વાહન (~0.05 kg/km)", tr3: "બસ / મેટ્રો (~0.08 kg/km)", tr4: "ચાલવું / સાયકલ (0.00 kg/km)",
+            en1: "ગ્રીડ વીજળી (~0.85 kg/kWh)", en2: "સોલર ઊર્જા (~0.04 kg/kWh)",
+            dt1: "માસાહારી આહાર (~7.2 kg/day)", dt2: "સંતુલિત આહાર (~4.5 kg/day)", dt3: "શાકાહારી (~2.9 kg/day)"
         },
         es: {
             title: "EcoTrack Pro", slogan: "Rastrea, reduce y compensa tu huella de carbono diaria.",
             logTitle: "Registrar Métricas", dateText: "📅 Fecha de Entrada", distText: "🚗 Distancia de Viaje",
             transportText: "Modo de Transporte", energyText: "⚡ Consumo de Energía", energySourceText: "Fuente de Energía",
-            dietText: "🍔 Opción de Dieta", wasteTitle: "♻️ Gestión de Residuos (Paso a Paso)", treeText: "🌳 Árboles Plantados (Compensación)",
-            calcBtn: "🧮 Calcular", saveBtn: "💾 Guardar", companionTitle: "Árbol Eco Compañero",
+            dietText: "🍔 Opción de Dieta", wasteTitle: "♻️ Gestión de Residuos (Paso a Paso)",
+            step1Text: "🍎 1. Residuos orgánicos compostados", step2Text: "♻️ 2. Reciclables separados", step3Text: "🗑️ 3. Se evitó plástico de un solo uso",
+            treeText: "🌳 Árboles Plantados (Compensación)", calcBtn: "🧮 Calcular", saveBtn: "💾 Guardar", companionTitle: "Árbol Eco Compañero",
             liveStatusText: "Estado del Árbol", analyticsTitle: "Análisis Diario", goalLabel: "🎯 Meta:",
             mTrans: "🚗 Emisiones de Transporte", mEner: "⚡ Emisiones de Energía", mWaste: "🗑️ Residuos y Dieta", mOffset: "🌳 Compensaciones",
-            trendTitle: "Tendencia de 7 Días", activityTitle: "Registro de Actividad", pdfBtn: "📥 Descargar PDF",
-            thDate: "Fecha", thTrans: "Transporte", thEner: "Energía", thDiet: "Dieta y Residuo", thOffset: "Compensación", thNet: "Neto Total", thAction: "Acción"
+            trendTitle: "Tendencia de Carbono", activityTitle: "Registro de Actividad", pdfBtn: "📥 Descargar PDF",
+            thDate: "Fecha", thTrans: "Transporte", thEner: "Energía", thDiet: "Dieta y Residuo", thOffset: "Compensación", thNet: "Neto Total", thAction: "Acción",
+            tr1: "Coche de Gasolina (~0.21 kg/km)", tr2: "Vehículo Eléctrico (~0.05 kg/km)", tr3: "Autobús / Metro (~0.08 kg/km)", tr4: "Caminar / Bicicleta (0.00 kg/km)",
+            en1: "Electricidad de Red (~0.85 kg/kWh)", en2: "Solar / Renovable (~0.04 kg/kWh)",
+            dt1: "Carne Alta (~7.2 kg/día)", dt2: "Mixta Equilibrada (~4.5 kg/día)", dt3: "Vegana (~2.9 kg/día)"
         },
         fr: {
             title: "EcoTrack Pro", slogan: "Suivez, réduisez et compensez votre empreinte carbone quotidienne.",
             logTitle: "Enregistrer les métriques", dateText: "📅 Date d'entrée", distText: "🚗 Distance de voyage",
             transportText: "Mode de transport", energyText: "⚡ Consommation d'énergie", energySourceText: "Source d'énergie",
-            dietText: "🍔 Choix de régime", wasteTitle: "♻️ Gestion des déchets (Étape par étape)", treeText: "🌳 Arbres plantés (Compensations)",
-            calcBtn: "🧮 Calculer", saveBtn: "💾 Enregistrer", companionTitle: "Arbre Compagnon Éco",
+            dietText: "🍔 Choix de régime", wasteTitle: "♻️ Gestion des déchets (Étape par étape)",
+            step1Text: "🍎 1. Déchets alimentaires compostés", step2Text: "♻️ 2. Recyclables séparés", step3Text: "🗑️ 3. Plastique à usage unique évité",
+            treeText: "🌳 Arbres plantés (Compensations)", calcBtn: "🧮 Calculer", saveBtn: "💾 Enregistrer", companionTitle: "Arbre Compagnon Éco",
             liveStatusText: "État de l'arbre en direct", analyticsTitle: "Analytique Quotidienne", goalLabel: "🎯 Objectif:",
             mTrans: "🚗 Émissions de transport", mEner: "⚡ Émissions d'énergie", mWaste: "🗑️ Déchets & Régime", mOffset: "🌳 Compensations d'arbres",
-            trendTitle: "Tendance Carbone sur 7 jours", activityTitle: "Journal d'activité", pdfBtn: "📥 Télécharger PDF",
-            thDate: "Date", thTrans: "Transport", thEner: "Énergie", thDiet: "Déchets", thOffset: "Compensations", thNet: "Total Net", thAction: "Action"
+            trendTitle: "Tendance Carbone", activityTitle: "Journal d'activité", pdfBtn: "📥 Télécharger PDF",
+            thDate: "Date", thTrans: "Transport", thEner: "Énergie", thDiet: "Déchets", thOffset: "Compensations", thNet: "Total Net", thAction: "Action",
+            tr1: "Voiture Essence (~0.21 kg/km)", tr2: "Véhicule Électrique (~0.05 kg/km)", tr3: "Bus / Métro (~0.08 kg/km)", tr4: "Marche / Vélo (0.00 kg/km)",
+            en1: "Électricité du réseau (~0.85 kg/kWh)", en2: "Solaire / Renouvelable (~0.04 kg/kWh)",
+            dt1: "Riche en viande (~7.2 kg/jour)", dt2: "Équilibré (~4.5 kg/jour)", dt3: "Végétalien (~2.9 kg/jour)"
         }
     };
 
-    // Centralized Text-to-Speech Helper function
+    // STEP 3: Multilingual Voice Input & Speech Output matching selected language
+    function getLangCode(lang) {
+        const langMap = {
+            en: 'en-US', hi: 'hi-IN', sa: 'sa-IN', ta: 'ta-IN',
+            te: 'te-IN', mr: 'mr-IN', bn: 'bn-IN', gu: 'gu-IN',
+            es: 'es-ES', fr: 'fr-FR'
+        };
+        return langMap[lang] || 'en-US';
+    }
+
     function speakText(text) {
         if (!('speechSynthesis' in window)) {
             showToast("Text-to-speech not supported.", false);
@@ -619,13 +805,22 @@
         }
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = currentLang === 'hi' ? 'hi-IN' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'fr' ? 'fr-FR' : 'en-US'));
+        
+        let targetLang = getLangCode(currentLang);
+        utterance.lang = targetLang;
+        utterance.rate = 1.0;
+        utterance.pitch = 1.05;
+
+        let voices = window.speechSynthesis.getVoices();
+        let selectedVoice = voices.find(v => v.lang.startsWith(targetLang.slice(0, 2)) || v.lang === targetLang);
+        if (selectedVoice) utterance.voice = selectedVoice;
+
         window.speechSynthesis.speak(utterance);
     }
 
     function changeLanguage(lang) {
         currentLang = lang;
-        const t = translations[lang];
+        const t = translations[lang] || translations['en'];
         document.getElementById('brandTitle').innerHTML = `${t.title} <span class="version-badge">ps9</span>`;
         document.getElementById('brandSlogan').innerText = t.slogan;
         document.getElementById('logCardTitle').innerText = t.logTitle;
@@ -636,6 +831,9 @@
         document.getElementById('energySourceText').innerText = t.energySourceText;
         document.getElementById('dietText').innerText = t.dietText;
         document.getElementById('wasteTitleText').innerText = t.wasteTitle;
+        if(document.getElementById('wasteStep1Text')) document.getElementById('wasteStep1Text').innerText = t.step1Text;
+        if(document.getElementById('wasteStep2Text')) document.getElementById('wasteStep2Text').innerText = t.step2Text;
+        if(document.getElementById('wasteStep3Text')) document.getElementById('wasteStep3Text').innerText = t.step3Text;
         document.getElementById('treeText').innerText = t.treeText;
         document.getElementById('calcBtnText').innerText = t.calcBtn;
         document.getElementById('companionTitle').innerText = t.companionTitle;
@@ -656,10 +854,20 @@
         document.getElementById('thOffset').innerText = t.thOffset;
         document.getElementById('thNet').innerText = t.thNet;
         document.getElementById('thAction').innerText = t.thAction;
+
+        if (t.tr1) document.getElementById('tr1').innerText = t.tr1;
+        if (t.tr2) document.getElementById('tr2').innerText = t.tr2;
+        if (t.tr3) document.getElementById('tr3').innerText = t.tr3;
+        if (t.tr4) document.getElementById('tr4').innerText = t.tr4;
+        if (t.en1) document.getElementById('en1').innerText = t.en1;
+        if (t.en2) document.getElementById('en2').innerText = t.en2;
+        if (t.dt1) document.getElementById('dt1').innerText = t.dt1;
+        if (t.dt2) document.getElementById('dt2').innerText = t.dt2;
+        if (t.dt3) document.getElementById('dt3').innerText = t.dt3;
+
         showToast("Language updated successfully!");
     }
 
-    // Draggable Button Logic + Click Toggle
     const chatToggleBtn = document.getElementById('chatToggleBtn');
     const chatWidget = document.getElementById('chatWidget');
     let isDragging = false;
@@ -721,7 +929,7 @@
         const container = document.getElementById('chatMessages');
         container.innerHTML = `
             <div class="chat-msg bot">
-                Hello! I am your Eco AI assistant. Ask me anything in natural language about carbon reduction, transport, diet, or tips to lower your footprint!
+                Hello! I am your self-learning Eco AI assistant. Ask me anything about carbon reduction, app voice commands, active trends, anomalies, or historical forecasts!
                 <button class="chat-msg-tts" onclick="speakChatMessage(this)" title="Read Aloud">🔊</button>
             </div>
         `;
@@ -763,10 +971,105 @@
         container.scrollTop = container.scrollHeight;
     }
 
+    // FEATURE 1: Expanded Self-Learning AI Engine & Predictive Analysis
     function getNaturalLanguageBotReply(msg) {
         const m = msg.toLowerCase();
+        aiMemory.interactionsCount = (aiMemory.interactionsCount || 0) + 1;
         
-        // Expanded contextual logic
+        // Track keywords self-learning
+        ['travel', 'energy', 'diet', 'undo', 'trend', 'voice', 'pdf', 'forecast', 'target', 'anomaly'].forEach(kw => {
+            if (m.includes(kw)) {
+                aiMemory.frequentQuestions[kw] = (aiMemory.frequentQuestions[kw] || 0) + 1;
+            }
+        });
+        saveAIMemory();
+
+        // Predictive Forecast AI
+        if (m.includes('forecast') || m.includes('predict') || m.includes('future')) {
+            if (historyData.length < 3) return "I need at least 3 logged days of history to generate an accurate carbon forecast.";
+            let recent = historyData.slice(0, 5);
+            let avg = recent.reduce((sum, d) => sum + parseFloat(d.net), 0) / recent.length;
+            let trendDir = parseFloat(recent[0].net) < avg ? "decreasing 🎉" : "increasing ⚠️";
+            return `🔮 AI Predictive Forecast: Your estimated emission for tomorrow is ~${avg.toFixed(2)} kg CO₂e based on your recent activity trend which is currently ${trendDir}.`;
+        }
+
+        // Self-Learned Tailored Recommendation Query
+        if (m.includes('learn') || m.includes('my habit') || m.includes('pattern') || m.includes('insight')) {
+            learnUserPatterns();
+            let mode = aiMemory.preferredMode;
+            if (mode === 'travel_heavy') {
+                return "Based on my learning from your logged activity, transport is your largest emission contributor! I recommend focusing on EV modes or public transit to cut up to 60% of your footprint.";
+            } else if (mode === 'power_heavy') {
+                return "From learning your historical data, energy usage dominates your footprint. Transitioning to solar options or turning off idle loads will yield your biggest carbon reduction.";
+            } else if (mode === 'diet_heavy') {
+                return "My learning shows diet & waste constitute your largest impact. Incorporating 2 plant-based days weekly will save over 300 kg CO₂ annually for you.";
+            } else {
+                return `I have processed ${aiMemory.interactionsCount} AI interactions with you. Keep logging daily data so I can refine my self-learning insights!`;
+            }
+        }
+
+        // Anomaly / Spike Detection via AI
+        if (m.includes('spike') || m.includes('anomaly') || m.includes('unusual')) {
+            if (historyData.length < 2) return "I need at least 2 logged days to analyze carbon spikes or anomalies.";
+            let values = historyData.map(d => parseFloat(d.net));
+            let avg = values.reduce((a,b)=>a+b, 0) / values.length;
+            let spike = historyData.find(d => parseFloat(d.net) > avg * 1.5);
+            if (spike) {
+                return `🚨 Anomaly Detected: On ${spike.date}, your net emission reached ${spike.net} kg CO₂e, which is over 50% higher than your average of ${avg.toFixed(2)} kg!`;
+            }
+            return `Good news! No major emission spikes detected. Your daily footprint remains stable near ${avg.toFixed(2)} kg CO₂e.`;
+        }
+
+        // Action execution directly via AI Chat
+        if (m.includes('undo')) {
+            undoLastAction();
+            return "Undone your previous activity change!";
+        }
+        if (m.includes('redo')) {
+            redoLastAction();
+            return "Redone your activity change!";
+        }
+        if (m.includes('calculate') || m.includes('compute preview')) {
+            calculatePreview();
+            return "I have computed your footprint preview on the main dashboard!";
+        }
+        if (m.includes('save entry') || m.includes('save log')) {
+            if (!document.getElementById('saveBtn').disabled) {
+                saveCalculatedEntry();
+                return "Done! I have saved your calculated footprint entry to the dashboard log.";
+            } else {
+                return "Please calculate your preview first before saving.";
+            }
+        }
+
+        // Dynamic Voice parsing command invocation inside AI Chat
+        if (m.includes('km') || m.includes('kwh') || m.includes('tree') || m.includes('drive')) {
+            let executed = parseVoiceCommand(m, false);
+            if (executed) {
+                return "I've updated your metrics form according to your instructions and calculated the result!";
+            }
+        }
+
+        // Advanced AI Data Analytics over History
+        if (m.includes('average') || m.includes('stats') || m.includes('summary') || m.includes('history summary')) {
+            if (historyData.length === 0) return "You don't have any logged entries yet. Try calculating and saving your daily metrics!";
+            let sum = historyData.reduce((acc, curr) => acc + parseFloat(curr.net), 0);
+            let avg = (sum / historyData.length).toFixed(2);
+            return `Based on your ${historyData.length} logged entries, your average daily footprint is ${avg} kg CO₂e.`;
+        }
+
+        if (m.includes('highest') || m.includes('worst day') || m.includes('max footprint')) {
+            if (historyData.length === 0) return "No history recorded yet to evaluate.";
+            let maxEntry = [...historyData].sort((a,b) => parseFloat(b.net) - parseFloat(a.net))[0];
+            return `Your highest recorded emission day was ${maxEntry.date} with a net footprint of ${maxEntry.net} kg CO₂e.`;
+        }
+
+        if (m.includes('best day') || m.includes('lowest') || m.includes('min footprint')) {
+            if (historyData.length === 0) return "No history recorded yet to evaluate.";
+            let minEntry = [...historyData].sort((a,b) => parseFloat(a.net) - parseFloat(b.net))[0];
+            return `Your lowest recorded footprint was on ${minEntry.date} with ${minEntry.net} kg CO₂e!`;
+        }
+        
         if (m.includes('my score') || m.includes('current footprint') || m.includes('how am i doing') || m.includes('progress')) {
             let net = document.getElementById('netScore').innerText;
             return `Your currently calculated net footprint is ${net} kg CO₂e. Keep tracking to stay green!`;
@@ -776,34 +1079,25 @@
             return "It was made by Paresh!";
         }
         if (m.includes('hello') || m.includes('hi') || m.includes('hey') || m.includes('greetings')) {
-            return "Hello! I am your personal Eco Assistant created by Paresh. How can I help you track your footprint, offer transport or diet tips, or calculate your current score today?";
+            return "Hello! I am your personal self-learning Eco Assistant created by Paresh. How can I help you track your footprint, control the app, undo actions, or inspect trends?";
         }
-        if (m.includes('car') || m.includes('drive') || m.includes('petrol') || m.includes('km') || m.includes('mile') || m.includes('transport') || m.includes('commute')) {
+        if (m.includes('car') || m.includes('drive') || m.includes('petrol') || m.includes('transport') || m.includes('commute')) {
             return "Driving a standard petrol car generates about 0.21 kg of CO₂e per kilometer. Try switching to electric vehicles, public transit, or cycling to dramatically lower your commute footprint!";
         }
         if (m.includes('diet') || m.includes('food') || m.includes('meat') || m.includes('vegan') || m.includes('eat') || m.includes('vegetarian')) {
             return "Diet has a huge impact! Meat-heavy diets average ~7.2 kg CO₂e/day, whereas plant-based or vegan diets drop down to ~2.9 kg CO₂e/day. Incorporating just one meatless day helps!";
         }
-        if (m.includes('energy') || m.includes('power') || m.includes('electricity') || m.includes('solar') || m.includes('kwh')) {
+        if (m.includes('energy') || m.includes('power') || m.includes('electricity') || m.includes('solar')) {
             return "Grid electricity contributes roughly 0.85 kg CO₂e per kWh. Transitioning to renewable solar or wind energy reduces your lifecycle emissions down to just ~0.04 kg per kWh.";
         }
         if (m.includes('tree') || m.includes('offset') || m.includes('plant')) {
             return "A healthy mature tree absorbs approximately 21.77 kg of CO₂ per year (about 0.06 kg every single day). Planting trees directly compensates long-term residual footprints.";
         }
-        if (m.includes('waste') || m.includes('trash') || m.includes('compost') || m.includes('plastic') || m.includes('recycle')) {
-            return "Composting organic food waste and sorting recyclables prevents harmful methane emissions from landfills. Use our step-by-step waste tracker above to log your habits!";
-        }
-        if (m.includes('goal') || m.includes('target') || m.includes('limit')) {
-            let goal = document.getElementById('dailyGoal').value || 12;
-            return `Your current daily limit target is set to ${goal} kg CO₂e. The ideal sustainable carbon target globally is under 5.5 kg CO₂e per person.`;
-        }
-        if (m.includes('how to reduce') || m.includes('tips') || m.includes('help me') || m.includes('advice')) {
-            return "To lower your footprint: 1. Use public transit or carpool. 2. Eat more plant-based meals. 3. Turn off unused electronics. 4. Compost food waste. Which area would you like to tackle first?";
-        }
         
-        return "That's an interesting question! Paresh designed me to help you track transport emissions, diet choices, renewable energy sources, and tree offsets. Feel free to ask about any of those, or ask for your 'current footprint'!";
+        return "That's an interesting question! Paresh designed me to help you track emissions, control the site via voice, execute undo/redo operations, and learn your habits. Try asking 'what are my learned habits?' or 'check emission spikes'!";
     }
 
+    // FEATURE 2: Full-Web Speech & Voice Command Controller Engine
     function startVoiceInput() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
@@ -811,14 +1105,14 @@
             return;
         }
         const recognition = new SpeechRecognition();
-        recognition.lang = currentLang === 'hi' ? 'hi-IN' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'fr' ? 'fr-FR' : 'en-US'));
+        recognition.lang = getLangCode(currentLang);
         recognition.start();
-        showToast("Listening... Try saying 'Travel 15 km', 'Calculate', or 'Save'");
+        showToast("🎙️ Listening... Speak metric numbers or UI commands in chosen language.");
 
         recognition.onresult = function(event) {
             const speechText = event.results[0][0].transcript.toLowerCase();
             showToast(`Heard: "${speechText}"`);
-            parseVoiceCommand(speechText);
+            parseVoiceCommand(speechText, true);
         };
         recognition.onerror = function() {
             showToast("Voice recognition failed. Please try again.", false);
@@ -832,7 +1126,7 @@
             return;
         }
         const recognition = new SpeechRecognition();
-        recognition.lang = currentLang === 'hi' ? 'hi-IN' : (currentLang === 'es' ? 'es-ES' : (currentLang === 'fr' ? 'fr-FR' : 'en-US'));
+        recognition.lang = getLangCode(currentLang);
         recognition.start();
         showToast("Listening for chat question...");
 
@@ -852,51 +1146,219 @@
         speakText(fullText);
     }
 
-    function parseVoiceCommand(text) {
+    // FEATURE 2 & STEP 3: Expanded Multilingual Voice Command Parser
+    function parseVoiceCommand(text, announce = true) {
         text = text.toLowerCase();
-        
-        // Handle explicit functional commands
-        if (text.includes('calculate')) {
-            calculatePreview();
-            speakText("Calculating your daily carbon footprint preview.");
-            return;
-        } else if (text.includes('save') || text.includes('log') || text.includes('submit')) {
-            if (!document.getElementById('saveBtn').disabled) {
-                saveCalculatedEntry();
-                speakText("Success! Carbon entry saved to your dashboard.");
-            } else {
-                speakText("Please calculate your preview first before attempting to save.");
-            }
-            return;
-        } else if (text.includes('theme') || text.includes('dark mode') || text.includes('light mode')) {
+        let updated = false;
+        let announcementList = [];
+
+        // 1. Web Page UI Voice Controls
+        if (text.includes('dark mode') || text.includes('light mode') || text.includes('toggle theme') || text.includes('theme') || text.includes('डार्क मोड')) {
             toggleTheme();
-            speakText("Interface theme has been toggled.");
-            return;
+            if (announce) speakText("Theme toggled successfully.");
+            return true;
+        }
+        if (text.includes('undo') || text.includes('वापस')) {
+            undoLastAction();
+            if (announce) speakText("Undone last activity action.");
+            return true;
+        }
+        if (text.includes('redo')) {
+            redoLastAction();
+            if (announce) speakText("Redone activity action.");
+            return true;
+        }
+        if (text.includes('download pdf') || text.includes('export pdf') || text.includes('pdf report') || text.includes('पीडीएफ')) {
+            downloadPDF();
+            if (announce) speakText("Downloading PDF carbon report.");
+            return true;
+        }
+        if (text.includes('export csv') || text.includes('csv')) {
+            exportCSV();
+            if (announce) speakText("Exporting CSV data file.");
+            return true;
+        }
+        if (text.includes('export json') || text.includes('export data')) {
+            exportData();
+            if (announce) speakText("Exporting JSON data.");
+            return true;
+        }
+        if (text.includes('clear history') || text.includes('clear all data') || text.includes('delete all data')) {
+            confirmClearHistory();
+            if (announce) speakText("Opened clear history confirmation dialog.");
+            return true;
+        }
+        if (text.includes('open knowledge') || text.includes('knowledge hub') || text.includes('knowledge')) {
+            openKnowledgeModal();
+            if (announce) speakText("Opening Green Technology Knowledge Hub.");
+            return true;
+        }
+        if (text.includes('close knowledge') || text.includes('close modal')) {
+            closeModal('knowledgeModal');
+            closeModal('confirmModal');
+            if (announce) speakText("Closed modal overlay.");
+            return true;
+        }
+        if (text.includes('sound on') || text.includes('sound off') || text.includes('toggle sound')) {
+            toggleSound();
+            if (announce) speakText("Sound feedback toggled.");
+            return true;
         }
 
-        const numbers = text.match(/\d+/g);
-        if (!numbers) {
-             speakText("I didn't catch a number or specific command. Try saying 'Travel 15 kilometers', 'Calculate', or 'Save'.");
-             return;
+        // Expanded Indian Language Voice Switching
+        if (text.includes('hindi') || text.includes('हिंदी')) {
+            changeLanguage('hi');
+            document.getElementById('langSelect').value = 'hi';
+            if (announce) speakText("भाषा हिंदी में बदली गई।");
+            return true;
         }
-        const val = parseFloat(numbers[0]);
+        if (text.includes('sanskrit') || text.includes('संस्कृतम्')) {
+            changeLanguage('sa');
+            document.getElementById('langSelect').value = 'sa';
+            if (announce) speakText("भाषा संस्कृतम्।");
+            return true;
+        }
+        if (text.includes('tamil') || text.includes('தமிழ்')) {
+            changeLanguage('ta');
+            document.getElementById('langSelect').value = 'ta';
+            if (announce) speakText("மொழி தமிழாக மாற்றப்பட்டது.");
+            return true;
+        }
+        if (text.includes('telugu') || text.includes('తెలుగు')) {
+            changeLanguage('te');
+            document.getElementById('langSelect').value = 'te';
+            if (announce) speakText("భాష తెలుగుకి మార్చబడింది.");
+            return true;
+        }
+        if (text.includes('marathi') || text.includes('मराठी')) {
+            changeLanguage('mr');
+            document.getElementById('langSelect').value = 'mr';
+            if (announce) speakText("भाषा मराठीत बदलली.");
+            return true;
+        }
+        if (text.includes('bengali') || text.includes('বাংলা')) {
+            changeLanguage('bn');
+            document.getElementById('langSelect').value = 'bn';
+            if (announce) speakText("ভাষা বাংলায় পরিবর্তন করা হয়েছে।");
+            return true;
+        }
+        if (text.includes('gujarati') || text.includes('ગુજરાતી')) {
+            changeLanguage('gu');
+            document.getElementById('langSelect').value = 'gu';
+            if (announce) speakText("ભાષા ગુજરાતીમાં બદલાઈ.");
+            return true;
+        }
+        if (text.includes('english')) {
+            changeLanguage('en');
+            document.getElementById('langSelect').value = 'en';
+            if (announce) speakText("Language changed to English.");
+            return true;
+        }
 
-        if (text.includes('travel') || text.includes('distance') || text.includes('kilometer') || text.includes('km') || text.includes('दूरी') || text.includes('यात्रा')) {
+        // Trend timeframe controls via speech
+        if (text.includes('7 days') || text.includes('7 day trend')) {
+            setTimeFrame('7d');
+            if (announce) speakText("Set trend timeframe to 7 days.");
+            return true;
+        }
+        if (text.includes('30 days') || text.includes('1 month') || text.includes('monthly trend')) {
+            setTimeFrame('30d');
+            if (announce) speakText("Set trend timeframe to 30 days.");
+            return true;
+        }
+        if (text.includes('1 year') || text.includes('yearly trend')) {
+            setTimeFrame('1y');
+            if (announce) speakText("Set trend timeframe to 1 year.");
+            return true;
+        }
+
+        // Target goal dynamic voice setter
+        const goalMatch = text.match(/(set goal|target goal|goal|लक्ष्य)\s*(to)?\s*(\d+)/);
+        if (goalMatch) {
+            let val = parseInt(goalMatch[3]);
+            document.getElementById('dailyGoal').value = val;
+            calculatePreview();
+            if (announce) speakText(`Daily carbon limit goal set to ${val} kilograms.`);
+            return true;
+        }
+
+        // 2. Metrics & Data Logging Voice Commands
+        const distMatch = text.match(/(\d+)\s*(km|kilometer|distance|दूरी|यात्रा)/);
+        if (distMatch) {
+            let val = parseFloat(distMatch[1]);
             document.getElementById('dist').value = val;
             document.getElementById('distLabel').innerText = val + ' km';
-            speakText(`Travel distance recorded as ${val} kilometers.`);
-        } else if (text.includes('power') || text.includes('energy') || text.includes('electricity') || text.includes('ऊर्जा') || text.includes('बिजली')) {
+            announcementList.push(`${val} kilometers distance`);
+            updated = true;
+        }
+
+        const powerMatch = text.match(/(\d+)\s*(kwh|power|energy|electricity|बिजली|ऊर्जा)/);
+        if (powerMatch) {
+            let val = parseFloat(powerMatch[1]);
             document.getElementById('power').value = val;
             document.getElementById('powerLabel').innerText = val + ' kWh';
-            speakText(`Energy consumption recorded as ${val} kilowatt hours.`);
-        } else if (text.includes('tree') || text.includes('plant') || text.includes('पेड़')) {
+            announcementList.push(`${val} kilowatt hours energy`);
+            updated = true;
+        }
+
+        const treeMatch = text.match(/(\d+)\s*(tree|trees|plant|plants|पेड़|झाडे)/);
+        if (treeMatch) {
+            let val = parseFloat(treeMatch[1]);
             document.getElementById('trees').value = val;
             document.getElementById('treeLabel').innerText = val + ' trees';
-            speakText(`${val} planted trees added to your daily offsets.`);
-        } else {
-            speakText(`I heard the number ${val}, but I'm not sure which category it belongs to.`);
+            announcementList.push(`${val} trees offset`);
+            updated = true;
         }
-        calculatePreview();
+
+        if (text.includes('vegan') || text.includes('वीगन')) {
+            document.getElementById('dietType').value = "2.90";
+            announcementList.push("vegan diet");
+            updated = true;
+        } else if (text.includes('meat') || text.includes('मांसाहार')) {
+            document.getElementById('dietType').value = "7.20";
+            announcementList.push("meat heavy diet");
+            updated = true;
+        }
+
+        if (text.includes('solar') || text.includes('renewable') || text.includes('सौर')) {
+            document.getElementById('energySource').value = "0.04";
+            announcementList.push("solar energy source");
+            updated = true;
+        } else if (text.includes('grid')) {
+            document.getElementById('energySource').value = "0.85";
+            announcementList.push("grid electricity");
+            updated = true;
+        }
+
+        if (updated) {
+            calculatePreview();
+            if (announce) {
+                speakText("Updated " + announcementList.join(", ") + " and calculated preview.");
+            }
+            if (text.includes('save') || text.includes('सहेजें')) {
+                setTimeout(() => saveCalculatedEntry(), 500);
+            }
+            return true;
+        }
+
+        if (text.includes('calculate') || text.includes('गणना')) {
+            calculatePreview();
+            if (announce) speakText("Calculating your daily carbon footprint preview.");
+            return true;
+        } else if (text.includes('save') || text.includes('log') || text.includes('submit') || text.includes('सहेजें')) {
+            if (!document.getElementById('saveBtn').disabled) {
+                saveCalculatedEntry();
+                if (announce) speakText("Success! Carbon entry saved to your dashboard.");
+            } else if (announce) {
+                speakText("Please calculate your preview first before attempting to save.");
+            }
+            return true;
+        }
+
+        if (announce) {
+            speakText("I didn't recognize that command. Try speaking 'Dark mode', 'Export PDF', '15 km distance', or 'Undo'.");
+        }
+        return false;
     }
 
     function speakTip() {
@@ -1130,7 +1592,7 @@
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(1200, now);
                 osc.frequency.exponentialRampToValueAtTime(600, now + 0.04);
-                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.setValueAtTime(0.35, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
@@ -1145,7 +1607,7 @@
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(659.25, now);
                 osc.frequency.exponentialRampToValueAtTime(1318.51, now + 0.09);
-                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.setValueAtTime(0.45, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
@@ -1161,7 +1623,7 @@
                     const startTime = now + (idx * 0.05);
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, startTime);
-                    gain.gain.setValueAtTime(0.15, startTime);
+                    gain.gain.setValueAtTime(0.40, startTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.12);
                     osc.connect(gain);
                     gain.connect(ctx.destination);
@@ -1178,7 +1640,7 @@
                     const startTime = now + (idx * 0.04);
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, startTime);
-                    gain.gain.setValueAtTime(0.12, startTime);
+                    gain.gain.setValueAtTime(0.35, startTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.15);
                     osc.connect(gain);
                     gain.connect(ctx.destination);
@@ -1196,7 +1658,7 @@
                     const startTime = now + (idx * 0.05);
                     osc.type = 'triangle';
                     osc.frequency.setValueAtTime(freq, startTime);
-                    gain.gain.setValueAtTime(0.25, startTime);
+                    gain.gain.setValueAtTime(0.55, startTime);
                     gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.35);
                     osc.connect(gain);
                     gain.connect(ctx.destination);
@@ -1212,7 +1674,7 @@
                 osc.type = 'sawtooth';
                 osc.frequency.setValueAtTime(350, now);
                 osc.frequency.exponentialRampToValueAtTime(80, now + 0.2);
-                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.setValueAtTime(0.50, now);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
                 osc.connect(gain);
                 gain.connect(ctx.destination);
@@ -1229,7 +1691,7 @@
                     const startTime = now + (idx * 0.05);
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, startTime);
-                    gain.gain.setValueAtTime(0.3, startTime);
+                    gain.gain.setValueAtTime(0.60, startTime);
                     gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.4);
                     osc.connect(gain);
                     gain.connect(ctx.destination);
@@ -1263,15 +1725,16 @@
         renderHistory();
         renderChart(); 
         updateGamification(false);
+        updateUndoRedoButtons();
+        learnUserPatterns();
 
-        // Hide Splash Screen after launch animation
         setTimeout(() => {
             const splash = document.getElementById('splashScreen');
             if (splash) {
                 splash.classList.add('fade-out');
-                setTimeout(() => splash.remove(), 600);
+                setTimeout(() => splash.remove(), 500);
             }
-        }, 1400);
+        }, 800);
     };
 
     function toggleTheme() {
@@ -1297,12 +1760,25 @@
         document.getElementById('distLabel').innerText = newVal + ' km';
     }
 
-    function showToast(msg, isSuccess = true) {
+    function showToast(msg, isSuccess = true, showUndo = false) {
         let toast = document.getElementById('toastBox');
-        toast.innerText = msg;
+        let textSpan = document.getElementById('toastText');
+        textSpan.innerText = msg;
         toast.style.borderLeftColor = isSuccess ? 'var(--primary)' : 'var(--danger)';
+        
+        let existingBtn = toast.querySelector('.toast-action');
+        if (existingBtn) existingBtn.remove();
+
+        if (showUndo) {
+            let uBtn = document.createElement('button');
+            uBtn.className = 'toast-action';
+            uBtn.innerText = 'Undo';
+            uBtn.onclick = () => { undoLastAction(); toast.classList.remove('show'); };
+            toast.appendChild(uBtn);
+        }
+
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
+        setTimeout(() => toast.classList.remove('show'), 3500);
     }
 
     function openKnowledgeModal() {
@@ -1317,8 +1793,10 @@
         playUIFeedback('click');
         document.getElementById(id).classList.remove('active');
     }
+
     function executeClearHistory() {
         playUIFeedback('delete');
+        pushHistoryState();
         historyData = [];
         localStorage.setItem('ecoTrackHistory', JSON.stringify([]));
         renderHistory();
@@ -1326,7 +1804,7 @@
         updateGamification(false);
         updateTreeState(10, 0);
         closeModal('confirmModal');
-        showToast("All data cleared successfully.", false);
+        showToast("All data cleared successfully.", false, true);
     }
 
     function triggerConfetti() {
@@ -1493,6 +1971,7 @@
         if (!pendingEntry) return;
 
         playUIFeedback('success');
+        pushHistoryState(); // Store for undo capability
 
         let goal = parseFloat(document.getElementById('dailyGoal').value) || 12;
         if (parseFloat(pendingEntry.net) <= goal) {
@@ -1508,10 +1987,11 @@
         renderHistory();
         renderChart();
         updateGamification(true);
+        learnUserPatterns();
         
         pendingEntry = null;
         document.getElementById('saveBtn').disabled = true;
-        showToast("Entry saved to dashboard!");
+        showToast("Entry saved to dashboard!", true, true);
     }
 
     function renderHistory() {
@@ -1543,12 +2023,13 @@
 
     function deleteEntry(index) {
         playUIFeedback('delete');
+        pushHistoryState(); // Save state for Undo
         historyData.splice(index, 1);
         localStorage.setItem('ecoTrackHistory', JSON.stringify(historyData));
         renderHistory();
         renderChart();
         updateGamification(false);
-        showToast("Entry deleted.", false);
+        showToast("Entry deleted.", false, true);
     }
 
     function updateGamification(triggerSound = false) {
@@ -1632,12 +2113,13 @@
             try {
                 const imported = JSON.parse(e.target.result);
                 if (Array.isArray(imported)) {
+                    pushHistoryState();
                     historyData = imported;
                     localStorage.setItem('ecoTrackHistory', JSON.stringify(historyData));
                     renderHistory();
                     renderChart();
                     updateGamification(true);
-                    showToast("Data imported successfully!");
+                    showToast("Data imported successfully!", true, true);
                 } else {
                     showToast("Invalid JSON file structure.", false);
                 }
@@ -1648,11 +2130,31 @@
         if(event.target.files[0]) fileReader.readAsText(event.target.files[0]);
     }
 
+    // FEATURE 3: Customizable Timeframes for Trend Chart
+    function setTimeFrame(range, btnEl) {
+        playUIFeedback('click');
+        currentTrendRange = range;
+        if (btnEl) {
+            document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+        }
+        renderChart();
+    }
+
     function renderChart() {
         const ctx = document.getElementById('trendChart').getContext('2d');
         if (trendChartInstance) trendChartInstance.destroy();
 
-        let chartData = [...historyData].slice(0, 7).sort((a, b) => new Date(a.date) - new Date(b.date));
+        let sortedHistory = [...historyData].sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        // Filter based on selected timeframe
+        let limit = sortedHistory.length;
+        if (currentTrendRange === '7d') limit = 7;
+        else if (currentTrendRange === '30d') limit = 30;
+        else if (currentTrendRange === '1y') limit = 365;
+
+        let chartData = sortedHistory.slice(-limit);
+
         const labels = chartData.map(d => d.date.substring(5)); 
         const data = chartData.map(d => parseFloat(d.net));
 
@@ -1669,32 +2171,36 @@
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Net Emissions (kg CO₂e)',
+                    label: 'Net CO₂ (kg)',
                     data: data,
                     borderColor: '#10b981',
                     backgroundColor: gradient,
-                    borderWidth: 3,
-                    pointBackgroundColor: '#10b981',
-                    pointBorderColor: '#fff',
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
                     fill: true,
-                    tension: 0.4
+                    tension: 0.3,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#10b981'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { ticks: { color: textColor, font: { family: "'Plus Jakarta Sans', sans-serif" } }, grid: { color: gridColor, drawBorder: false } },
-                    y: { ticks: { color: textColor, font: { family: "'Plus Jakarta Sans', sans-serif" } }, grid: { color: gridColor, drawBorder: false }, beginAtZero: true }
+                plugins: {
+                    legend: { display: false }
                 },
-                animation: { duration: 1500, easing: 'easeOutQuart' }
+                scales: {
+                    x: {
+                        ticks: { color: textColor },
+                        grid: { color: gridColor }
+                    },
+                    y: {
+                        ticks: { color: textColor },
+                        grid: { color: gridColor }
+                    }
+                }
             }
         });
     }
 </script>
-
 </body>
 </html>
